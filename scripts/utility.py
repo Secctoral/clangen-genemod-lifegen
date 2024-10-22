@@ -552,10 +552,7 @@ def create_new_cat_block(
         cat_type = "loner"
     elif "clancat" in attribute_list:
         cat_type = "former Clancat"
-    else:
-        cat_type = choice(['kittypet', 'kittypet', 'loner', 'loner', 'former Clancat'])
-
-
+        
     # LIFEGEN: for encountered dead cats --
     elif "clan_status" in attribute_list:
         if status:
@@ -585,7 +582,7 @@ def create_new_cat_block(
     # -------------------------------------
 
     else:
-        cat_type = choice(['kittypet', 'loner', 'former Clancat'])
+        cat_type = choice(['kittypet', 'kittypet', 'loner', 'loner', 'former Clancat'])
 
     # LITTER
     litter = False
