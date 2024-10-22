@@ -132,7 +132,52 @@ class Sprites:
             'collars', 'bellcollars', 'bowcollars', 'nyloncollars',
             'shadersnewwhite', 'lightingnew', 
             'fademask', 'fadestarclan', 'fadedarkforest',
-            'symbols'
+            'symbols',
+            
+            #OHDANS
+            'flower_accessories', 'plant2_accessories', 'snake_accessories', 'smallAnimal_accessories', 'deadInsect_accessories',
+            'aliveInsect_accessories', 'fruit_accessories', 'crafted_accessories', 'tail2_accessories',
+
+            #WILDS
+            'wildaccs_1', 'wildaccs_2',
+
+            #SUPERARTSI
+            'superartsi',
+
+            #coffee
+            'coffee',
+
+            'eragona',
+
+            "crowns",
+
+            "wooddragon",
+
+            "springwinter",
+
+            "raincoat",
+
+            "poptabs",
+
+            "fazbear",
+
+            "bears",
+
+            "tide",
+
+            "chimes",
+
+            "moipa",
+
+            "moipa2",
+
+            "eggs",
+
+            "pumpkinbatharness",
+
+            "toast",
+
+            "stoats"
 
         ]:
             if 'lineart' in x and game.config['fun']['april_fools']:
@@ -346,6 +391,189 @@ class Sprites:
         Loads scar sprites and puts them into groups.
         """
 
+        # ohdan's accessories
+        for a, i in enumerate([
+            "DAISY", "DIANTHUS", "BLEEDING HEARTS", "FRANGIPANI", "BLUE GLORY", "CATNIP FLOWER", "BLANKET FLOWER", "ALLIUM", "LACELEAF", "PURPLE GLORY"]):
+            self.make_group('flower_accessories', (a, 0), f'acc_flower{i}')
+        for a, i in enumerate([
+            "YELLOW PRIMROSE", "HESPERIS", "MARIGOLD", "WISTERIA"]):
+            self.make_group('flower_accessories', (a, 1), f'acc_flower{i}')
+        
+        for a, i in enumerate([
+            "CLOVER", "STICK", "PUMPKIN", "MOSS", "IVY", "ACORN", "MOSS PELT", "REEDS", "BAMBOO"]):
+            self.make_group('plant2_accessories', (a, 0), f'acc_plant2{i}')
+
+        for a, i in enumerate([
+            "GRASS SNAKE", "BLUE RACER", "WESTERN COACHWHIP", "KINGSNAKE"]):
+            self.make_group('snake_accessories', (a, 0), f'acc_snake{i}')
+            
+        for a, i in enumerate([
+            "GRAY SQUIRREL", "RED SQUIRREL", "CRAB", "WHITE RABBIT", "BLACK RABBIT", "BROWN RABBIT", "INDIAN GIANT SQUIRREL", "FAWN RABBIT", "BROWN AND WHITE RABBIT", "BLACK AND WHITE RABBIT"]):
+            self.make_group('smallAnimal_accessories', (a, 0), f'acc_smallAnimal{i}')
+        for a, i in enumerate([
+            "WHITE AND FAWN RABBIT", "BLACK VITILIGO RABBIT", "BROWN VITILIGO RABBIT", "FAWN VITILIGO RABBIT", "BLACKBIRD", "ROBIN", "JAY", "THRUSH", "CARDINAL", "MAGPIE"]):
+            self.make_group('smallAnimal_accessories', (a, 1), f'acc_smallAnimal{i}')
+        for a, i in enumerate([
+            "CUBAN TROGON", "TAN RABBIT", "TAN AND WHITE RABBIT", "TAN VITILIGO RABBIT", "RAT", "WHITE MOUSE", "BLACK MOUSE", "GRAY MOUSE", "BROWN MOUSE", "GRAY RABBIT"]):
+            self.make_group('smallAnimal_accessories', (a, 2), f'acc_smallAnimal{i}')
+        for a, i in enumerate([
+            "GRAY AND WHITE RABBIT", "GRAY VITILIGO RABBIT"]):
+            self.make_group('smallAnimal_accessories', (a, 3), f'acc_smallAnimal{i}')
+            
+        for a, i in enumerate([
+            "LUNAR MOTH", "ROSY MAPLE MOTH", "MONARCH BUTTERFLY", "DAPPLED MONARCH", "POLYPHEMUS MOTH", "MINT MOTH"]):
+            self.make_group('deadInsect_accessories', (a, 0), f'acc_deadInsect{i}')
+            
+        for a, i in enumerate([
+            "BROWN SNAIL", "RED SNAIL", "WORM", "BLUE SNAIL", "ZEBRA ISOPOD", "DUCKY ISOPOD", "DAIRY COW ISOPOD", "BEETLEJUICE ISOPOD", "BEE", "RED LADYBUG"]):
+            self.make_group('aliveInsect_accessories', (a, 0), f'acc_aliveInsect{i}')
+        for a, i in enumerate([
+            "ORANGE LADYBUG", "YELLOW LADYBUG"]):
+            self.make_group('aliveInsect_accessories', (a, 1), f'acc_aliveInsect{i}')
+        
+        for a, i in enumerate([
+            "RASPBERRY", "BLACKBERRY", "GOLDEN RASPBERRY", "CHERRY", "YEW"]):
+            self.make_group('fruit_accessories', (a, 0), f'acc_fruit{i}')
+        
+        for a, i in enumerate([
+            "WILLOWBARK BAG", "CLAY DAISY POT", "CLAY AMANITA POT", "CLAY BROWNCAP POT", "BIRD SKULL", "LEAF BOW"]):
+            self.make_group('crafted_accessories', (a, 0), f'acc_crafted{i}')
+        
+        for a, i in enumerate([
+            "SEAWEED", "DAISY CORSAGE"]):
+            self.make_group('tail2_accessories', (a, 0), f'acc_tail2{i}')
+
+
+        # wilds accessories redone sheets by moipa and jay
+        for a, i in enumerate([
+            "LILYPAD", "LARGE DEATHBERRY", "SMALL DEATHBERRY", "ACORN2", "PINECONE", "VINE"]):
+            self.make_group('wildaccs_1', (a, 0), f'acc_herbs{i}')
+        
+        for a, i in enumerate([
+            "CHERRY2", "BLEEDING HEARTS2", "SHELL PACK", "FERNS", "GOLD FERNS"]):
+            self.make_group('wildaccs_1', (a, 1), f'acc_herbs{i}')
+
+        for a, i in enumerate([
+            "WHEAT", "BLACK WHEAT"]):
+            self.make_group('wildaccs_1', (a, 2), f'acc_herbs{i}')
+        
+        # -------------------------------------------------------------------------
+        
+        for a, i in enumerate([
+            "BERRIES", "CLOVERS", "CLOVER2", "MOSS2", "FLOWER MOSS", "MUSHROOMS"]):
+            self.make_group('wildaccs_2', (a, 0), f'acc_herbs{i}')
+
+        for a, i in enumerate([
+            "LARGE LUNA", "LARGE COMET", "SMALL LUNA", "SMALL COMET", "LADYBUG"]):
+            self.make_group('wildaccs_2', (a, 1), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "MUD PAWS", "ASHY PAWS"]):
+            self.make_group('wildaccs_2', (a, 2), f'acc_wild{i}')
+
+        # superartsi's accessories
+
+        for a, i in enumerate([
+            "ORANGEBUTTERFLY", "BLUEBUTTERFLY", "BROWNPELT", "GRAYPELT", "BROWNMOSSPELT", "GRAYMOSSPELT"]):
+            self.make_group('superartsi', (a, 0), f'acc_wild{i}')
+        for a, i in enumerate([
+            "FERN", "MOREFERN", "BLEEDINGHEART", "LILY"]):
+            self.make_group('superartsi', (a, 1), f'acc_wild{i}')
+
+        # coffee's accessories
+        for a, i in enumerate([
+            "PINKFLOWERCROWN", "YELLOWFLOWERCROWN", "BLUEFLOWERCROWN", "PURPLEFLOWERCROWN"]):
+            self.make_group('coffee', (a, 0), f'acc_flower{i}')
+
+        # eragona rose's accessories
+
+        for a, i in enumerate([
+            "REDHARNESS", "NAVYHARNESS", "YELLOWHARNESS", "TEALHARNESS", "ORANGEHARNESS", "GREENHARNESS"]):
+            self.make_group('eragona', (a, 0), f'collars{i}')
+        for a, i in enumerate([
+            "MOSSHARNESS", "RAINBOWHARNESS", "BLACKHARNESS", "BEEHARNESS", "CREAMHARNESS"]):
+            self.make_group('eragona', (a, 1), f'collars{i}')
+        for a, i in enumerate([
+            "PINKHARNESS", "MAGENTAHARNESS", "PEACHHARNESS", "VIOLETHARNESS"]):
+            self.make_group('eragona', (a, 2), f'collars{i}')
+
+        for a, i in enumerate([
+            "YELLOWCROWN", "REDCROWN", "LILYPADCROWN"]):
+            self.make_group('crowns', (a, 0), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "WOODDRAGON"]):
+            self.make_group('wooddragon', (a, 0), f'acc_wild{i}')
+
+
+        for a, i in enumerate(["CHERRYBLOSSOM","TULIPPETALS","CLOVERFLOWER","PANSIES","BELLFLOWERS","SANVITALIAFLOWERS","EGGSHELLS","BLUEEGGSHELLS","EASTEREGG","FORSYTHIA"]):
+            self.make_group('springwinter', (a, 0), f'acc_wild{i}')
+        for a, i in enumerate([
+            "MINTLEAF","STICKS","SPRINGFEATHERS","SNAILSHELL","MUD","CHERRYPLUMLEAVES","CATKIN","HONEYCOMB","FLOWERCROWN","LILIESOFTHEVALLEY"]):
+            self.make_group('springwinter', (a, 1), f'acc_wild{i}')
+        for a, i in enumerate([
+            "STRAWMANE","MISTLETOE","REDPOINSETTIA","WHITEPOINSETTIA","COTONEASTERWREATH","YEWS","HEATHER","TEETHCOLLAR","DRIEDORANGE","ROESKULL"]):
+            self.make_group('springwinter', (a, 2), f'acc_wild{i}')
+        for a, i in enumerate([
+            "WOODENOAKANTLERS","WOODENBIRCHANTLERS","DOGWOOD","GRAYWOOL","BLACKWOOL","CREAMWOOL","WHITEWOOL","FIRBRANCHES","CORALBELLS","SLIVERDUSTPLANT"]):
+            self.make_group('springwinter', (a, 3), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "RAINCOAT"]):
+            self.make_group('raincoat', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "POPTABS"]):
+            self.make_group('poptabs', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "FAZBEAR"]):
+            self.make_group('fazbear', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "WHITEBEAR", "PANDA", "BEAR", "BROWNBEAR"]):
+            self.make_group('bears', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "TIDE"]):
+            self.make_group('tide', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "CELESTIALCHIMES", "STARCHIMES", "LUNARCHIMES", "SILVERLUNARCHIMES"]):
+            self.make_group('chimes', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "FIDDLEHEADS", "LANTERNS", "HEARTCHARMS"]):
+            self.make_group('moipa', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "SPRINGFLOWERCORSAGE", "ORCHID", "SPRINGFLOWERS", "RADIO", "SWANFEATHER", "DRACULAPARROTFEATHER"]):
+            self.make_group('moipa2', (a, 0), f'acc_flower{i}')
+        
+        for a, i in enumerate([
+            "JAYFEATHER", "EAGLEFEATHER", "STARFLOWERS", "HEARTLEAVES", "YELLOWWISTERIA", "HOLLY2"]):
+            self.make_group('moipa2', (a, 1), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "HOLLYVINES", "LAVENDERHEADPIECE", "LAVENDERTAILWRAP", "LAVENDERANKLET"]):
+            self.make_group('moipa2', (a, 2), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "EGG"]):
+            self.make_group('eggs', (a, 0), f'acc_wild{i}')
+
+        for a, i in enumerate([
+            "BATHARNESS"]):
+            self.make_group('pumpkinbatharness', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "TOAST", "TOASTBERRY", "TOASTGRAPE", "TOASTNUTELLA", "TOASTPB"]):
+            self.make_group('toast', (a, 0), f'acc_crafted{i}')
+
+        for a, i in enumerate([
+            "WINTERSTOAT", "BROWNSTOAT"]):
+            self.make_group('stoats', (a, 0), f'acc_wild{i}')
+
         # Define scars
         scars_data = [
             ["ONE", "TWO", "THREE", "MANLEG", "BRIGHTHEART", "MANTAIL", "BRIDGE", "RIGHTBLIND", "LEFTBLIND",
@@ -410,6 +638,19 @@ class Sprites:
             ["PINKNYLON", "PURPLENYLON", "MULTINYLON", "INDIGONYLON"]
         ]
 
+        nyloncollars_data = [
+            ["CRIMSONNYLON", "BLUENYLON", "YELLOWNYLON", "CYANNYLON", "REDNYLON", "LIMENYLON"],
+            ["GREENNYLON", "RAINBOWNYLON", "BLACKNYLON", "SPIKESNYLON", "WHITENYLON"],
+            ["PINKNYLON", "PURPLENYLON", "MULTINYLON", "INDIGONYLON"]
+        ]
+
+        nyloncollars_data = [
+            ["CRIMSONNYLON", "BLUENYLON", "YELLOWNYLON", "CYANNYLON", "REDNYLON", "LIMENYLON"],
+            ["GREENNYLON", "RAINBOWNYLON", "BLACKNYLON", "SPIKESNYLON", "WHITENYLON"],
+            ["PINKNYLON", "PURPLENYLON", "MULTINYLON", "INDIGONYLON"]
+        ]
+
+
         # medcatherbs
         for row, herbs in enumerate(medcatherbs_data):
             for col, herb in enumerate(herbs):
@@ -442,6 +683,8 @@ class Sprites:
         for row, nyloncollars in enumerate(nyloncollars_data):
             for col, nyloncollar in enumerate(nyloncollars):
                 self.make_group('nyloncollars', (col, row), f'collars{nyloncollar}')
+
+    
 
     def load_symbols(self):
         """
