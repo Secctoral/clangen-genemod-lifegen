@@ -3002,7 +3002,16 @@ class Cat:
                 self.__remove_mentor()
 
         # Need to pick a random mentor if not specified
-        if 'request apprentice' in game.switches:
+        if not self.mentor:
+            potential_mentors = []
+            priority_mentors = []
+            for cat in self.all_cats.values():
+                if self.is_valid_mentor(cat):
+                    potential_mentors.append(cat)
+                    if not cat.apprentice and not cat.not_working():
+                        priority_mentors.append(cat)
+            # First try for a cat who currently has no apprentices and is working
+            if 'request apprentice' in game.switches:
                 if game.switches['request apprentice'] and self.moons == 6:
                     new_mentor = game.clan.your_cat
                 else:
