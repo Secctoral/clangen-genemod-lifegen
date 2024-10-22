@@ -3938,7 +3938,7 @@ def generate_sprite(
                 new_sprite.blit(
                     sprites.sprites["collars" + cat.pelt.accessory + cat_sprite], (0, 0)
                 )
-                elif cat.pelt.accessory in cat.pelt.flower_accessories:
+            elif cat.pelt.accessory in cat.pelt.flower_accessories:
                 new_sprite.blit(
                     sprites.sprites["acc_flower" + cat.pelt.accessory + cat_sprite], (0, 0)
                 )
