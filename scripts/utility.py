@@ -228,7 +228,7 @@ def get_random_moon_cat(
         if mentor_app_modifier:
             if (
                 main_cat.status
-                in ["apprentice", "mediator apprentice", "healer apprentice"]
+                in ["apprentice", "mediator apprentice", "medicine cat apprentice"]
                 and main_cat.mentor
                 and not int(random() * 3)
             ):
@@ -448,7 +448,7 @@ def create_new_cat_block(
             if index in in_event_cats:
                 if in_event_cats[index] in [
                     "apprentice",
-                    "healer apprentice",
+                    "medicine cat apprentice",
                     "mediator apprentice",
                 ]:
                     print("Can't give apprentices mates")
@@ -502,8 +502,8 @@ def create_new_cat_block(
             "warrior",
             "mediator apprentice",
             "mediator",
-            "healer apprentice",
-            "healer",
+            "medicine cat apprentice",
+            "medicine cat",
         ]:
             status = match.group(1)
             break
@@ -533,11 +533,11 @@ def create_new_cat_block(
             break
 
     if status and not age:
-        if status in ["apprentice", "mediator apprentice", "healer apprentice"]:
+        if status in ["apprentice", "mediator apprentice", "medicine cat apprentice"]:
             age = randint(
                 Cat.age_moons["adolescent"][0], Cat.age_moons["adolescent"][1]
             )
-        elif status in ["warrior", "mediator", "healer"]:
+        elif status in ["warrior", "mediator", "medicine cat"]:
             age = randint(
                 Cat.age_moons["young adult"][0], Cat.age_moons["senior adult"][1]
             )
@@ -555,6 +555,38 @@ def create_new_cat_block(
     else:
         cat_type = choice(['kittypet', 'kittypet', 'loner', 'loner', 'former Clancat'])
 
+
+    # LIFEGEN: for encountered dead cats --
+    elif "clan_status" in attribute_list:
+        if status:
+            cat_type = status
+        else:
+            if age:
+                if age < 6:
+                    cat_type = "kitten"
+                elif age < 12:
+                    cat_type = choice(
+                        [
+                            "apprentice", "medicine cat apprentice",
+                            "mediator apprentice", "queen's apprentice"
+                        ]
+                    )
+                elif age < 120:
+                    cat_type = choice(
+                        [
+                            "warrior", "medicine cat", "mediator", "queen"
+                        ]
+                    )
+                else:
+                    cat_type = "elder"
+            else:
+                age = randint(12,100)
+                cat_type = choice(["warrior", "medicine cat", "mediator", "queen"])
+    # -------------------------------------
+
+    else:
+        cat_type = choice(['kittypet', 'loner', 'former Clancat'])
+
     # LITTER
     litter = False
     if "litter" in attribute_list:
@@ -567,9 +599,9 @@ def create_new_cat_block(
         chosen_backstory = choice(
             BACKSTORIES["backstory_categories"]["abandoned_backstories"]
         )
-    elif status == "healer" and cat_type == "former Clancat":
+    elif status == "medicine cat" and cat_type == "former Clancat":
         chosen_backstory = choice(["medicine_cat", "disgraced1"])
-    elif status == "healer":
+    elif status == "medicine cat":
         chosen_backstory = choice(["wandering_healer1", "wandering_healer2"])
     else:
         if cat_type == "former Clancat":
@@ -612,6 +644,12 @@ def create_new_cat_block(
     if "dead" in attribute_list:
         alive = False
         thought = "Explores a new, starry world"
+
+     # LIFEGEN: encountered dead cat residences -----------------------
+    df = False
+    encountered_dead_df = False
+    encountered_dead_sc = False
+    encountered_dead_ur = False
 
     # check if we can use an existing cat here
     chosen_cat = None
@@ -724,6 +762,25 @@ def create_new_cat_block(
                 n_c.genotype.fevercoat = True
                 if n_c.genotype.chimera:
                     n_c.genotype.chimerageno.fevercoat = True
+
+            # LIFEGEN: encountered dead cat stuff -----------------------------
+            beginning = History.get_beginning(n_c)
+            if encountered_dead_df or encountered_dead_sc or encountered_dead_ur:
+                beginning['encountered'] = True
+            else:
+                beginning['encountered'] = False
+
+            if "encountered" in beginning:
+                if beginning["encountered"] is True:
+                    if n_c.parent2 != game.clan.your_cat.ID:
+                        n_c.dead_for = randint(50,140)
+                    n_c.dead = True
+                    n_c.status = status
+
+                    if n_c.parent2 == game.clan.your_cat.ID:
+                        n_c.thought = "Just met their parent!"
+                        n_c.dead_for = n_c.moons
+            # ------------------------------------------------------------------
 
             # SET MATES
             for inter_cat in give_mates:
@@ -876,11 +933,11 @@ def create_new_cat(
             age = 0
         elif litter or kit:
             age = randint(1, 5)
-        elif status in ('apprentice', 'healer apprentice', 'mediator apprentice'):
+        elif status in ('apprentice', 'medicine cat apprentice', 'mediator apprentice'):
             age = randint(6, 11)
         elif status == "warrior":
             age = randint(23, 120)
-        elif status == 'healer':
+        elif status == 'medicine cat':
             age = randint(23, 140)
         elif status == "elder":
             age = randint(120, 130)
@@ -981,6 +1038,34 @@ def create_new_cat(
         # give apprentice aged cat a mentor
         if new_cat.age == "adolescent":
             new_cat.update_mentor()
+
+        if df:
+            if status != "kitten":
+                scarchance = randint(1,5)
+                if scarchance == 1 or 2 or 3:
+                    scar = choice(Pelt.scars1)
+                    new_cat.pelt.scars.append(scar)
+                    if new_cat.status in ["warrior", "deputy", "leader"]:
+                        scarchance = randint(1,2)
+                        if scarchance == 1:
+                            scar = choice(Pelt.scars3)
+                            new_cat.pelt.scars.append(scar)
+                    elif new_cat.status in ["medicine cat", "apprentice", 
+                    "elder", "medicine cat apprentice", "queen", "mediator", 
+                    "queen's apprentice", "mediator apprentice"]:
+                        scarchance = randint(1,8)
+                        if scarchance == 1:
+                            scar = choice(Pelt.scars3)
+                            new_cat.pelt.scars.append(scar)
+                    scar2chance = randint(1,50)
+                    if scar2chance == 1:
+                        scar = choice(Pelt.scars2)
+                        new_cat.pelt.scars.append(scar)
+            else:
+                scarchance = randint(1,2)
+                if scarchance == 1:
+                    scar = choice(Pelt.scars1)
+                    new_cat.pelt.scars.append(scar)
 
         # Remove disabling scars, if they generated.
         not_allowed = [
@@ -1505,6 +1590,9 @@ def gather_cat_objects(
             out_set.add(event.patrol_leader)
         elif abbr == "s_c":
             out_set.add(stat_cat)
+        # LG
+        elif abbr == "y_c":
+            out_set.add(game.clan.your_cat)
         elif abbr == "app1" and len(event.patrol_apprentices) >= 1:
             out_set.add(event.patrol_apprentices[0])
         elif abbr == "app2" and len(event.patrol_apprentices) >= 2:
@@ -1530,6 +1618,17 @@ def gather_cat_objects(
             index = int(index)
             if index < len(event.new_cats):
                 out_set.update(event.new_cats[index])
+
+    # LIFEGEN ABBREVS ------------------------
+    try:
+        for kitty in event.patrol_cat_dict.items():
+            print(abbr_list)
+            if kitty[0] in abbr_list:
+                out_set.add(kitty[1])
+    except AttributeError:
+        pass
+    # im so lazy but this works lmfao
+    # ----------------------------------------
 
     return list(out_set)
 
@@ -1787,6 +1886,30 @@ def change_relationship_values(
                     )
                     if log_text not in rel.log:
                         rel.log.append(log_text)
+
+
+def get_cluster(trait):
+        # Mapping traits to their respective clusters
+        trait_to_clusters = {
+            "assertive": ["bloodthirsty", "fierce", "bold", "daring", "confident", "arrogant", "competitive", "smug", "impulsive", "noisy"],
+            "brooding": ["bloodthirsty", "cold", "gloomy", "strict", "vengeful", "grumpy", "bullying", "secretive", "aloof", "stoic", "reserved"],
+            "cool": ["charismatic", "cunning", "arrogant", "charming", "manipulative", "leader-like", "passionate", "witty", "flexible", "mellow", "flamboyant"],
+            "upstanding": ["righteous", "ambitious", "strict", "competitive", "responsible", "bossy", "know-it-all", "leader-like", "smug", "loyal", "justified", "methodical"],
+            "introspective": ["lonesome", "righteous", "calm", "wise", "thoughtful", "quiet", "daydreamer", "flexible", "mellow"],
+            "neurotic": ["nervous", "insecure", "lonesome", "quiet", "secretive", "careful", "meek", "cowardly", "emotional"],
+            "silly": ["troublesome", "childish", "playful", "strange", "noisy", "attention-seeker", "rebellious", "bouncy", "energetic", "spontaneous"],
+            "stable": ["loyal", "responsible", "wise", "faithful", "polite", "disciplined", "patient", "passionate", "witty", "trusting"],
+            "sweet": ["compassionate", "faithful", "loving", "oblivious", "sincere", "sweet", "polite", "daydreamer", "trusting", "humble", "emotional"],
+            "unabashed": ["childish", "confident", "bold", "shameless", "strange", "oblivious", "flamboyant", "impulsive", "noisy", "honest", "spontaneous"],
+            "unlawful": ["adventurous", "sneaky", "rebellious", "manipulative", "obsessive", "aloof", "stoic", "cunning", "troublesome"]
+        }
+        clusters = [key for key, values in trait_to_clusters.items() if trait in values]
+
+        # Assign cluster and second_cluster based on the length of clusters list
+        cluster = clusters[0] if clusters else ""
+        second_cluster = clusters[1] if len(clusters) > 1 else ""
+
+        return cluster, second_cluster
 
 
 # ---------------------------------------------------------------------------- #
@@ -2107,7 +2230,7 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
         kitty = Cat.fetch_cat(game.clan.deputy)
         cat_dict["dep_name"] = (str(kitty.name), choice(kitty.pronouns))
     if "med_name" in text:
-        kitty = choice(get_alive_status_cats(Cat, ["healer"], working=True))
+        kitty = choice(get_alive_status_cats(Cat, ["medicine cat"], working=True))
         cat_dict["med_name"] = (str(kitty.name), choice(kitty.pronouns))
 
     if cat_dict:
@@ -2131,7 +2254,8 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
 def event_text_adjust(
     Cat,
     text,
-    *,
+    patrol_cat_dict={},
+    # LIFEGEN ^^ this dict is for the random abbrevs in our patrols.,
     patrol_leader=None,
     main_cat=None,
     random_cat=None,
@@ -2203,6 +2327,11 @@ def event_text_adjust(
         if stat_cat:
             replace_dict["s_c"] = (str(stat_cat.name), get_pronouns(stat_cat))
 
+    # LIFEGEN ABBREVS
+    if game.current_screen == 'patrol screen':
+        for cat in patrol_cat_dict.items():
+            replace_dict[cat[0]] = (str(cat[1].name), choice(cat[1].pronouns))
+
     # other_cats
     if patrol_cats:
         other_cats = [
@@ -2258,7 +2387,7 @@ def event_text_adjust(
 
     # med_name
     if "med_name" in text:
-        med = choice(get_alive_status_cats(Cat, ["healer"], working=True))
+        med = choice(get_alive_status_cats(Cat, ["medicine cat"], working=True))
         replace_dict["med_name"] = (str(med.name), choice(med.pronouns))
 
     # assign all names and pronouns
@@ -3812,6 +3941,42 @@ def generate_sprite(
                 new_sprite.blit(
                     sprites.sprites["collars" + cat.pelt.accessory + cat_sprite], (0, 0)
                 )
+                elif cat.pelt.accessory in cat.pelt.flower_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_flower" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.plant2_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_plant2" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.snake_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_snake" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.smallAnimal_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_smallAnimal" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.deadInsect_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_deadInsect" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.aliveInsect_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_aliveInsect" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.fruit_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_fruit" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.crafted_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_crafted" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
+            elif cat.pelt.accessory in cat.pelt.tail2_accessories:
+                new_sprite.blit(
+                    sprites.sprites["acc_tail2" + cat.pelt.accessory + cat_sprite], (0, 0)
+                )
 
         # Apply fading fog
         if (
@@ -3902,6 +4067,1765 @@ def get_text_box_theme(theme_name=None):
         return ObjectID("#dark", theme_name)
     else:
         return theme_name
+
+# ---------------------------------------------------------------------------- #
+#                            LIFEGEN TEXT ABBREVS                              #
+# ---------------------------------------------------------------------------- #
+
+
+def add_to_cat_dict(abbrev, cluster, x, rel, r, abbrev_cat, text, cat_dict):
+    """ Adds a cat to the dict, assigning them to their abbrev to be reused in later text. """
+
+    if cluster and rel:
+        cat_dict[f"{r}_{abbrev}_{x}"] = abbrev_cat
+        text = re.sub(fr'(?<!\/){r}_{abbrev}_{x}(?!\/)', str(abbrev_cat.name), text)
+    elif cluster and not rel:
+        cat_dict[f"{abbrev}_{x}"] = abbrev_cat
+        text = re.sub(fr'(?<!\/){abbrev}_{x}(?!\/)', str(abbrev_cat.name), text)
+    elif rel and not cluster:
+        cat_dict[f"{r}_{abbrev}"] = abbrev_cat
+        text = re.sub(fr'(?<!\/){r}_{abbrev}(?!\/)', str(abbrev_cat.name), text)
+    else:
+        cat_dict[f"{abbrev}"] = abbrev_cat
+        text = re.sub(fr'(?<!\/){abbrev}(?!\/)', str(abbrev_cat.name), text)
+    
+    return text
+
+
+def abbrev_addons(t_c, r_c, cluster, x, rel, r):
+    """ Checks if cluster and relationship adodns are fulfilled.
+        x = cluster
+        r = relationship value
+        cluster and rel are booleans for if the addons are present.
+    """
+
+    if (cluster and x not in get_cluster(r_c.personality.trait)):
+        return False
+    
+    if (rel and (r_c.ID not in t_c.relationships) or\
+    (r == "plike" and t_c.relationships[r_c.ID].platonic_like < 20) or\
+    (r == "plove" and t_c.relationships[r_c.ID].platonic_like < 50) or\
+    (r == "rlike" and t_c.relationships[r_c.ID].romantic_love < 10) or\
+    (r == "rlove" and t_c.relationships[r_c.ID].romantic_love < 50) or\
+    (r == "dislike" and t_c.relationships[r_c.ID].dislike < 15) or\
+    (r == "hate" and t_c.relationships[r_c.ID].dislike < 50) or\
+    (r == "jealous" and t_c.relationships[r_c.ID].jeaousy < 20) or\
+    (r == "trust" and t_c.relationships[r_c.ID].trust < 20) or\
+    (r == "comfort" and t_c.relationships[r_c.ID].comfortable < 20) or \
+    (r == "respect" and t_c.relationships[r_c.ID].admiration < 20) or\
+    (r == "neutral" and\
+        ((t_c.relationships[r_c.ID].platonic_like > 20) or\
+            (t_c.relationships[r_c.ID].romantic_love > 20) or\
+            (t_c.relationships[r_c.ID].dislike > 20) or\
+            (t_c.relationships[r_c.ID].jealousy > 20) or\
+            (t_c.relationships[r_c.ID].trust > 20) or\
+            (t_c.relationships[r_c.ID].comfortable > 20) or\
+            (t_c.relationships[r_c.ID].admiration > 20)))):
+        return False
+
+def cat_dict_check(abbrev, cluster, x, rel, r, text, cat_dict):
+    """ Checks if a cat is in the dict already.
+    If so, it will reuse the name in later text.
+    If not, it will find a cat for the abbrev."""
+
+    in_dict = False
+    if f"{abbrev}_{x}" in cat_dict or f"{abbrev}" in cat_dict or f"{r}_{abbrev}" in cat_dict or f"{r}_{abbrev}_{x}" in cat_dict:
+        in_dict = True
+        if cluster and rel:
+            text = re.sub(fr'(?<!\/){r}_{abbrev}_{x}(?!\/)', str(cat_dict[f"{r}_{abbrev}_{x}"].name), text)
+        elif cluster and not rel:
+            text = re.sub(fr'(?<!\/){abbrev}_{x}(?!\/)', str(cat_dict[f"{abbrev}_{x}"].name), text)
+        elif rel and not cluster:
+            text = re.sub(fr'(?<!\/){r}_{abbrev}(?!\/)', str(cat_dict[f"{r}_{abbrev}"].name), text)
+        else:
+            text = re.sub(fr'(?<!\/){abbrev}(?!\/)', str(cat_dict[f"{abbrev}"].name), text)
+    return text, in_dict
+
+other_dict = {}   
+def adjust_txt(Cat, text, cat, cat_dict, r_c_allowed, o_c_allowed):
+    """ Adjusts dialogue text by replacing abbreviations with cat names
+    :param Cat Cat: Cat class
+    :param list text: The text being processed 
+    :param Cat cat: The object of the cat to whom relationship addons will apply
+    :param Dict cat_dict: the dict of cat objects
+    :param bool r_c_allowed: Whether or not r_c will be tried for. True for dialogue, False for patrols
+    :param bool o_c_allowed: Whether or not o_c will be tried for. True for dialogue, False for patrols
+    """
+
+    COUNTER_LIM = 30
+    you = game.clan.your_cat
+    try:
+        if "your_crush" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'your_crush(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)your_crush', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("your_crush", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(you.mate) > 0 or you.no_mates:
+                    return ""
+                crush = None
+                for c in get_alive_cats(Cat):
+                    addon_check = abbrev_addons(cat, c, cluster, x, rel, r)
+                    if c.ID == you.ID or c.ID == cat.ID or c.ID in cat.mate or c.ID in you.mate or c.age != you.age or\
+                    addon_check is False:
+                        continue
+                    relations = you.relationships.get(c.ID)
+                    if not relations:
+                        continue
+                    if relations.romantic_love > 10:
+                        crush = c
+                        break
+                if crush:
+                    text = add_to_cat_dict("your_crush", cluster, x, rel, r, crush, text, cat_dict)
+                else:
+                    return ""
+
+        if "their_crush" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'their_crush(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)their_crush', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("their_crush", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(cat.mate) > 0 or cat.no_mates:
+                    return ""
+                crush = None
+                for c in get_alive_cats(Cat):
+                    addon_check = abbrev_addons(cat, c, cluster, x, rel, r)
+                    if c.ID == you.ID or c.ID == cat.ID or c.ID in cat.mate or c.ID in you.mate or c.age != cat.age or\
+                    addon_check is False:
+                        continue
+                    relations = cat.relationships.get(c.ID)
+                    if not relations:
+                        continue
+                    if relations.romantic_love > 10:
+                        crush = c
+                        break
+                if crush:
+                    text = add_to_cat_dict("their_crush", cluster, x, rel, r, crush, text, cat_dict)
+                else:
+                    return ""
+
+        # Multiple random cats
+        for i in range(0,4):
+            # Random cats
+            r_c_str = f"r_c{i}"
+            if r_c_str in text:
+                cluster = False
+                rel = False
+                match = re.search(fr'r_c{i}(\w+)', text)
+                if match:
+                    x = match.group(1).strip("_")
+                    cluster = True
+                else:
+                    x = ""
+
+                match2 = re.search(fr'(\w+)r_c{i}', text)
+                if match2:
+                    r = match2.group(1).strip("_")
+                    rel = True
+                else:
+                    r = ""
+
+                text, in_dict = cat_dict_check(r_c_str, cluster, x, rel, r, text, cat_dict)
+
+                if in_dict is False:
+                    alive_cats = get_alive_cats(Cat)
+                    if len(alive_cats) < 3:
+                        return ""
+                    alive_cat = choice(alive_cats)
+                    addon_check = abbrev_addons(cat, alive_cat, cluster, x, rel, r)
+                    counter = 0
+
+                    while (alive_cat.ID == you.ID or alive_cat.ID == cat.ID or addon_check is False\
+                    or alive_cat in list(cat_dict.values())):
+                        alive_cat = choice(alive_cats)
+                        addon_check = abbrev_addons(cat, alive_cat, cluster, x, rel, r)
+                        counter += 1
+                        if counter >= 30:
+                            return ""
+                    text = add_to_cat_dict(f"r_c{i}", cluster, x, rel, r, alive_cat, text, cat_dict)
+
+            # Random warriors
+            r_w_str = f"r_w{i}"
+            if r_w_str in text:
+                cluster = False
+                rel = False
+                match = re.search(fr'r_w{i}(\w+)', text)
+                if match:
+                    x = match.group(1).strip("_")
+                    cluster = True
+                else:
+                    x = ""
+
+                match2 = re.search(fr'(\w+)r_w{i}', text)
+                if match2:
+                    r = match2.group(1).strip("_")
+                    rel = True
+                else:
+                    r = ""
+
+                text, in_dict = cat_dict_check(f"r_w{i}", cluster, x, rel, r, text, cat_dict)
+                    
+                alive_cats = get_alive_status_cats(Cat, ["warrior"])
+                if len(alive_cats) < 3:
+                    return ""
+                alive_cat = choice(alive_cats)
+                addon_check = abbrev_addons(cat, alive_cat, cluster, x, rel, r)
+                counter = 0
+                while (alive_cat.ID == you.ID or alive_cat.ID == cat.ID or addon_check is False\
+                or alive_cat in list(cat_dict.values())):
+                    alive_cat = choice(alive_cats)
+                    addon_check = abbrev_addons(cat, alive_cat, cluster, x, rel, r)
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                text = add_to_cat_dict(f"r_w{i}", cluster, x, rel, r, alive_cat, text, cat_dict)
+        
+        # Random cats who are potential mates
+        if "n_r1" in text:
+            if "n_r2" not in text:
+                return ""
+            cluster1 = False
+            rel1 = False
+            cluster2 = False
+            rel2 = False
+            match = re.search(fr'n_r1{i}(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster1 = True
+            else:
+                x = ""
+            match2 = re.search(fr'(\w+)n_r1{i}', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel1 = True
+            else:
+                r = ""
+            match3 = re.search(fr'n_r2{i}(\w+)', text)
+            if match:
+                x = match3.group(1).strip("_")
+                cluster2 = True
+            else:
+                x = ""
+            match4 = re.search(fr'(\w+)n_r2{i}', text)
+            if match2:
+                r = match4.group(1).strip("_")
+                rel2 = True
+            else:
+                r = ""
+
+            random_cat1 = choice(get_alive_cats(Cat))
+            random_cat2 = choice(get_alive_cats(Cat))
+
+            addon_check1 = abbrev_addons(cat, random_cat1, cluster1, x, rel1, r)
+            addon_check2 = abbrev_addons(cat, random_cat2, cluster2, x, rel2, r)
+            counter = 0
+
+            while (random_cat1.ID == you.ID or random_cat1.ID == cat.ID or addon_check1 is False or\
+            not random_cat1.is_potential_mate(random_cat2) or random_cat2.age != random_cat1.age) or \
+            (random_cat2.ID == you.ID or random_cat2.ID == cat.ID or addon_check2 is False or\
+            not random_cat2.is_potential_mate(random_cat1)):
+                
+                random_cat1 = choice(get_alive_cats(Cat))
+                random_cat2 = choice(get_alive_cats(Cat))
+                addon_check1 = abbrev_addons(cat, random_cat1, cluster1, x, rel1, r)
+                addon_check2 = abbrev_addons(cat, random_cat2, cluster2, x, rel2, r)
+
+                counter +=1
+                if counter > 40:
+                    return ""
+            if random_cat1.ID == you.ID or random_cat1.ID == cat.ID or random_cat2.ID == you.ID or random_cat2.ID == cat.ID:
+                return ""
+            
+            text = add_to_cat_dict("n_r1", cluster1, x, rel1, r, random_cat1, text, cat_dict)
+            text = add_to_cat_dict("n_r2", cluster2, x, rel2, r, random_cat2, text, cat_dict)
+
+        # Random kit
+        if "r_k" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_k(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+
+            match2 = re.search(r'(\w+)r_k', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("r_k", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_kits = get_alive_status_cats(Cat, ["kitten", "newborn"])
+                if len(alive_kits) <= 0:
+                    return ""
+
+                alive_kit = choice(alive_kits)
+                addon_check = abbrev_addons(cat, alive_kit, cluster, x, rel, r)
+
+                counter = 0
+                # lord forgive me there must be a less disgusting way to do this sorry
+                while (alive_kit.ID == you.ID or alive_kit.ID == cat.ID or addon_check is False):
+                    counter += 1
+                    alive_kit = choice(alive_kits)
+                    addon_check = abbrev_addons(cat, alive_kit, cluster, x, rel, r)
+                    if counter >= 30:
+                        return ""
+                    
+                text = add_to_cat_dict("r_k", cluster, x, rel, r, alive_kit, text, cat_dict)
+        
+        # Random warrior apprentice
+        if "r_a" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_a(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+
+            match2 = re.search(r'(\w+)r_a', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("r_a", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["apprentice"])
+                if len(alive_apps) <= 0:
+                    return ""
+
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                
+                while alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False:
+                    counter += 1
+                    if counter >= 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                
+                text = add_to_cat_dict("r_a", cluster, x, rel, r, alive_app, text, cat_dict)
+        
+        # Random warriors
+        if "r_w" in text and "r_w1" not in text and "r_w2" not in text and "r_w3" not in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_w(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+
+            match2 = re.search(r'(\w+)r_w', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("r_w", cluster, x, rel, r, text, cat_dict)
+            
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["warrior"])
+                if len(alive_apps) <= 0:
+                    return ""
+
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                
+                while alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False:
+                    counter += 1
+                    if counter >= 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("r_w", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random medicine cat or medicine cat apprentice
+        if "r_m" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_m(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_m', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("r_m", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["medicine cat", "medicine cat apprentice"])
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False):
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("r_m", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random mediator or mediator apprentice
+        if "r_d" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_d(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_d', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("r_d", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["mediator", "mediator apprentice"])
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False):
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                
+                text = add_to_cat_dict("r_d", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random queen or queen's apprentice
+        if "r_q" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_q(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_q', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("r_q", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["queen", "queen's apprentice"])
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False:
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("r_q", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random elder
+        if "r_e" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_e(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_e', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("r_e", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_status_cats(Cat, ["elder"])
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False):
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                    
+                text = add_to_cat_dict("r_e", cluster, x, rel, r, alive_app, text, cat_dict)
+        
+        # Random sick cat
+        if "r_s" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_s(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_s', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("r_s", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_cats(Cat)
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or not alive_app.is_ill()):
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                text = add_to_cat_dict("r_s", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random injured cat
+        if "r_i" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_i(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_i', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("r_i", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_cats(Cat)
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                while alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or not alive_app.is_injured():
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                text = add_to_cat_dict("r_i", cluster, x, rel, r, alive_app, text, cat_dict)
+        # random grieving cat
+        if "r_g" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'r_g(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)r_g', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("r_g", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_apps = get_alive_cats(Cat)
+                if len(alive_apps) <= 0:
+                    return ""
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or "grief stricken" not in alive_app.illnesses):
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 40:
+                        return ""
+                text = add_to_cat_dict("r_g", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Your sibling-- any age
+        if "y_s" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_s(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_s', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("y_s", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(you.inheritance.get_siblings()) == 0:
+                    return ""
+                counter = 0
+                sibling = Cat.fetch_cat(choice(you.inheritance.get_siblings()))
+                addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+
+                while sibling.outside or sibling.dead or sibling.ID == game.clan.your_cat.ID or sibling.ID == cat.ID or\
+                addon_check is False:
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                    sibling = Cat.fetch_cat(choice(you.inheritance.get_siblings()))
+                    addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+
+                text = add_to_cat_dict("y_s", cluster, x, rel, r, sibling, text, cat_dict)
+
+        # your littermate
+        if "y_l" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_l(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_l', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("y_l", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(you.inheritance.get_siblings()) == 0:
+                    return ""
+                counter = 0
+                sibling = Cat.fetch_cat(choice(you.inheritance.get_siblings()))
+                addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+                while sibling.outside or sibling.dead or sibling.ID == you.ID or sibling.ID == cat.ID or sibling.moons != cat.moons or addon_check is False:
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                    sibling = Cat.fetch_cat(choice(you.inheritance.get_siblings()))
+                    addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+
+                text = add_to_cat_dict("y_l", cluster, x, rel, r, sibling, text, cat_dict)
+
+        # Their sibling-- any age
+        if "t_s" in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_s(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_s', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("t_s", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(cat.inheritance.get_siblings()) == 0:
+                    return ""
+                sibling = Cat.fetch_cat(choice(cat.inheritance.get_siblings()))
+                addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+                counter = 0
+                while sibling.outside or sibling.dead or sibling.ID == game.clan.your_cat.ID or sibling.ID == cat.ID or\
+                addon_check is False:
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                    sibling = Cat.fetch_cat(choice(cat.inheritance.get_siblings()))
+                    addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+                
+                text = add_to_cat_dict("t_s", cluster, x, rel, r, sibling, text, cat_dict)
+
+        # their littermate
+        if "t_l" in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_l(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_l', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            
+            text, in_dict = cat_dict_check("t_l", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if len(cat.inheritance.get_siblings()) == 0:
+                    return ""
+                sibling = Cat.fetch_cat(choice(cat.inheritance.get_siblings()))
+                addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+                counter = 0
+
+                while sibling.outside or sibling.dead or sibling.ID == game.clan.your_cat.ID or sibling.ID == cat.ID or sibling.moons != cat.moons or addon_check is False:
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                    sibling = Cat.fetch_cat(choice(cat.inheritance.get_siblings()))
+                    addon_check = abbrev_addons(cat, sibling, cluster, x, rel, r)
+
+                text = add_to_cat_dict("t_l", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Your apprentice
+        if "y_a" in text:
+            if "y_a" in cat_dict:
+                text = re.sub(r'(?<!\/)y_a(?!\/)', str(cat_dict["y_a"].name), text)
+            else:
+                if len(you.apprentice) == 0:
+                    return ""
+                your_app = Cat.fetch_cat(choice(you.apprentice))
+                if your_app.ID == cat.ID:
+                    return ""
+                cat_dict["y_a"] = your_app
+                text = re.sub(r'(?<!\/)y_a(?!\/)', str(your_app.name), text)
+
+        # Their apprentice
+        if "t_a" in text:
+            if "t_a" in cat_dict:
+                text = re.sub(r'(?<!\/)t_a(?!\/)', str(cat_dict["t_a"].name), text)
+            else:
+                if len(cat.apprentice) == 0:
+                    return ""
+                their_app = Cat.fetch_cat(choice(cat.apprentice))
+                if their_app.ID == you.ID:
+                    return ""
+                cat_dict["t_a"] = their_app
+                text = re.sub(r'(?<!\/)t_a(?!\/)', str(their_app.name), text)
+
+        # Your parent
+        if "y_p" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_p(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_p', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("y_p", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                try:
+                    parent = Cat.fetch_cat(choice(you.inheritance.get_parents()))
+                except:
+                    return ""
+                addon_check = abbrev_addons(cat, parent, cluster, x, rel, r)
+
+                if len(you.inheritance.get_parents()) == 0 or parent.outside or parent.dead or parent.ID == cat.ID or\
+                addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("y_p", cluster, x, rel, r, parent, text, cat_dict)
+
+        # Their parent
+        if "t_p_positive" in text or "t_p_negative" in text or "t_p" in text:
+            if "t_p_positive" in cat_dict:
+                text = re.sub(r'(?<!\/)t_p_positive(?!\/)', str(cat_dict["t_p_positive"].name), text)
+            if "t_p_negative" in cat_dict:
+                text = re.sub(r'(?<!\/)t_p_negative(?!\/)', str(cat_dict["t_p_negative"].name), text)
+            if "t_p" in cat_dict:
+                text = re.sub(r'(?<!\/)t_p(?!\/)', str(cat_dict["t_p"].name), text)
+            if "t_p_positive" not in cat_dict or "t_p_negative" not in cat_dict or "t_p" not in cat_dict:
+                if len(cat.inheritance.get_parents()) == 0:
+                    return ""
+                parent = Cat.fetch_cat(choice(cat.inheritance.get_parents()))
+                counter = 0
+                while parent.outside or parent.dead or parent.ID == you.ID:
+                    counter += 1
+                    if counter > COUNTER_LIM:
+                        return ""
+                    parent = Cat.fetch_cat(choice(cat.inheritance.get_parents()))
+                if parent.relationships and cat.ID in parent.relationships and parent.relationships[cat.ID].dislike > 10 and "t_p_negative" in text:
+                    cat_dict["t_p_negative"] = parent
+                    text = re.sub(r'(?<!\/)t_p_negative(?!\/)', str(parent.name), text)
+                else:
+                    return ""
+                if parent.relationships and cat.ID in parent.relationships and parent.relationships[cat.ID].platonic_like > 10 and "t_p_positive" in text:
+                    cat_dict["t_p_positive"] = parent
+                    text = re.sub(r'(?<!\/)t_p_positive(?!\/)', str(parent.name), text)
+                else:
+                    return ""
+                cat_dict["t_p"] = parent
+                text = re.sub(r'(?<!\/)t_p(?!\/)', str(parent.name), text)
+        
+        # Your mate
+        if "y_m" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_m(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_m', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("y_m", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if you.mate:
+                    mate0 = Cat.fetch_cat(choice(you.mate))
+                else:
+                    return ""
+                addon_check = abbrev_addons(cat, mate0, cluster, x, rel, r)
+
+                if you.mate is None or len(you.mate) == 0 or you.ID in cat.mate or addon_check is False:
+                    return ""
+                if mate0.outside or mate0.dead:
+                    return ""
+                
+                text = add_to_cat_dict("y_m", cluster, x, rel, r, mate0, text, cat_dict)
+
+        # Their mate
+        if "t_m" in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_m(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_m', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("t_m", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if cat.mate:
+                    mate1 = Cat.fetch_cat(choice(cat.mate))
+                else:
+                    return ""
+                addon_check = abbrev_addons(cat, mate1, cluster, x, rel, r)
+
+                if cat.mate is None or len(cat.mate) == 0 or cat.ID in you.mate or addon_check is False:
+                    return ""
+                if mate1.outside or mate1.dead:
+                    return ""
+                
+                text = add_to_cat_dict("t_m", cluster, x, rel, r, mate1, text, cat_dict)
+
+        # Their adult kit
+        if "t_ka" in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_ka(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_ka', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("t_ka", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if cat.inheritance.get_children() is None or len(cat.inheritance.get_children()) == 0:
+                    return ""
+                
+                kit = Cat.fetch_cat(choice(cat.inheritance.get_children()))
+                addon_check = abbrev_addons(cat, kit, cluster, x, rel, r)
+
+                if kit.moons < 12 or kit.outside or kit.dead or kit.ID == cat.ID or kit.ID == you.ID or\
+                addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("t_ka", cluster, x, rel, r, kit, text, cat_dict)
+
+        # Their kitten kit
+        if "t_kk" in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_kk(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_kk', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("t_kk", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if cat.inheritance.get_children() is None or len(cat.inheritance.get_children()) == 0:
+                    return ""
+                
+                kit = Cat.fetch_cat(choice(cat.inheritance.get_children()))
+                addon_check = abbrev_addons(cat, kit, cluster, x, rel, r)
+
+                if kit.moons >= 6 or kit.outside or kit.dead or kit.ID == cat.ID or\
+                addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("t_kk", cluster, x, rel, r, kit, text, cat_dict)
+
+        # Their kit
+        if "t_k" in text and "t_kk" not in text and "t_ka" not in text:
+            cluster = False
+            rel = False
+            match = re.search(r't_k(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)t_k', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("t_k", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if cat.inheritance.get_children() is None or len(cat.inheritance.get_children()) == 0:
+                    return ""
+                
+                kit = Cat.fetch_cat(choice(cat.inheritance.get_children()))
+                addon_check = abbrev_addons(cat, kit, cluster, x, rel, r)
+
+                if kit.outside or kit.dead or kit.ID == cat.ID or addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("t_k", cluster, x, rel, r, kit, text, cat_dict)
+
+        # Your kit
+        if "y_k" in text and "y_kk" not in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_k(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_k', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("y_k", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if you.inheritance.get_children() is None or len(you.inheritance.get_children()) == 0:
+                    return ""
+                
+                kit = Cat.fetch_cat(choice(you.inheritance.get_children()))
+                addon_check = abbrev_addons(cat, kit, cluster, x, rel, r)
+
+                if kit.outside or kit.dead or kit.ID == cat.ID or addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("r_w", cluster, x, rel, r, kit, text, cat_dict)
+
+        # Your kit-- kitten age
+        if "y_kk" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'y_kk(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)y_kk', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("y_kk", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if you.inheritance.get_children() is None or len(you.inheritance.get_children()) == 0:
+                    return ""
+                
+                kit = Cat.fetch_cat(choice(you.inheritance.get_children()))
+                addon_check = abbrev_addons(cat, kit, cluster, x, rel, r)
+
+                if kit.moons >= 6 or kit.outside or kit.dead or kit.ID == cat.ID or addon_check is False:
+                    return ""
+                
+                text = add_to_cat_dict("y_kk", cluster, x, rel, r, kit, text, cat_dict)
+        
+        # Random cat
+        if r_c_allowed is True:
+            if "r_c" in text and "r_c1" not in text and "r_c2" not in text and "r_c3" not in text and "r_c4" not in text:
+                cluster = False
+                rel = False
+                match = re.search(r'r_c(\w+)', text)
+                if match:
+                    x = match.group(1).strip("_")
+                    cluster = True
+                else:
+                    x = ""
+                match2 = re.search(r'(\w+)r_c', text)
+                if match2:
+                    r = match2.group(1).strip("_")
+                    rel = True
+                else:
+                    r = ""
+            
+                text, in_dict = cat_dict_check("r_c", cluster, x, rel, r, text, cat_dict)
+
+                if in_dict is False:
+                    random_cat = choice(get_alive_cats(Cat))
+                    addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+
+                    counter = 0
+                    while random_cat.ID == you.ID or random_cat.ID == cat.ID or addon_check is False:
+                        if counter == 30:
+                            return ""
+                        random_cat = choice(get_alive_cats(Cat))
+                        addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                        counter += 1
+
+                    text = add_to_cat_dict("r_c", cluster, x, rel, r, random_cat, text, cat_dict)
+        # Other Clan
+        if o_c_allowed is True:
+            if "o_c" in text:
+                if "o_c" in other_dict:
+                    text = re.sub(r'(?<!\/)o_c(?!\/)', str(other_dict["o_c"].name), text)
+                else:
+                    other_clan = choice(game.clan.all_clans)
+                    if not other_clan:
+                        return ""
+                    other_dict["o_c"] = other_clan
+                    text = re.sub(r'(?<!\/)o_c(?!\/)', str(other_clan.name), text)
+
+        # Your DF Mentor
+        if "df_m_n" in text:
+            if you.joined_df and not you.dead and you.df_mentor and cat.ID != you.df_mentor and not Cat.all_cats.get(you.df_mentor) is None:
+                cat_dict["df_m_n"] = Cat.all_cats.get(you.df_mentor)
+                text = re.sub(r'(?<!\/)df_m_n(?!\/)', str(Cat.all_cats.get(you.df_mentor).name), text)
+            else:
+                return ""
+            
+        # Their mentor
+        if "tm_n" in text:
+            if cat.mentor is None or cat.mentor == you.ID:
+                return ""
+            cat_dict["tm_n"] = Cat.fetch_cat(cat.mentor)
+            text = re.sub(r'(?<!\/)tm_n(?!\/)', str(Cat.fetch_cat(cat.mentor).name), text)
+            
+
+        # Your mentor
+        if "m_n" in text:
+            if you.mentor is None or you.mentor == cat.ID:
+                return ""
+            cat_dict["m_n"] = Cat.fetch_cat(you.mentor)
+            text = re.sub(r'(?<!\/)m_n(?!\/)', str(Cat.fetch_cat(you.mentor).name), text)
+
+        # Their DF metnor
+        if "t_df_mn" in text:
+            if cat.joined_df and not cat.dead and cat.df_mentor:
+                cat_dict["t_df_mn"] = Cat.all_cats.get(cat.df_mentor)
+                text = re.sub(r'(?<!\/)t_df_mn(?!\/)', str(Cat.all_cats.get(cat.df_mentor).name), text)
+            else:
+                return ""
+        
+        # Clan leader's name
+        if "l_n" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'l_n(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)l_n', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            if game.clan.leader is None:
+                return ""
+            addon_check = abbrev_addons(cat, game.clan.leader, cluster, x, rel, r)
+            if game.clan.leader.dead or game.clan.leader.outside or game.clan.leader.ID == you.ID or game.clan.leader.ID == cat.ID or addon_check is False:
+                return ""
+            
+            text = add_to_cat_dict("l_n", cluster, x, rel, r, game.clan.leader, text, cat_dict)
+
+        # Deputy's name
+        if "d_n" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'd_n(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)d_n', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            if game.clan.deputy is None:
+                return ""
+            addon_check = abbrev_addons(cat, game.clan.deputy, cluster, x, rel, r)
+            if game.clan.deputy.dead or game.clan.deputy.outside or game.clan.deputy.ID == you.ID or game.clan.deputy.ID == cat.ID or addon_check is False:
+                return ""
+            
+            text = add_to_cat_dict("d_n", cluster, x, rel, r, game.clan.deputy, text, cat_dict)
+
+        # Dead cat
+        # if cat is grieving, will their grief cat. otherwise will be arandom starclan cat
+        if "d_c" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'd_c(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)d_c', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("d_c", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                if "grief stricken" in cat.illnesses:
+                    dead_cat = Cat.all_cats.get(choice(game.clan.starclan_cats))
+                    try:
+                        dead_cat = Cat.all_cats.get(cat.illnesses['grief stricken'].get("grief_cat"))
+                    except:
+                        pass
+
+                addon_check = abbrev_addons(cat, dead_cat, cluster, x, rel, r)
+
+                counter = 0
+                while (dead_cat.ID == you.ID or dead_cat.ID == cat.ID or dead_cat.ID in [game.clan.instructor.ID, game.clan.demon.ID] or addon_check is False):
+                    if counter == 30:
+                        return ""
+                    dead_cat = Cat.all_cats.get(choice(game.clan.starclan_cats))
+                    addon_check = abbrev_addons(cat, dead_cat, cluster, x, rel, r)
+                    counter += 1
+                cat_dict["d_c"] = dead_cat
+                # words = text.split()
+                # for i, word in enumerate(words):
+                #     if word == "d_c" and (i == 0 or words[i-1][-1] != "{"):
+                #         words[i] = str(dead_cat.name)
+                # text = " ".join(words)
+
+                text = add_to_cat_dict("d_c", cluster, x, rel, r, dead_cat, text, cat_dict)
+
+        # Random dark forest cat
+        if "rdf_c" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rdf_c(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rdf_c', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("rdf_c", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                random_cat = Cat.all_cats.get(choice(game.clan.darkforest_cats))
+                addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+
+                counter = 0
+                while random_cat.ID == you.ID or random_cat.ID == cat.ID or addon_check is False:
+                    if counter == 30:
+                        return ""
+                    random_cat = Cat.all_cats.get(choice(game.clan.darkforest_cats))
+                    addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                    counter +=1
+
+                text = add_to_cat_dict("rdf_c", cluster, x, rel, r, random_cat, text, cat_dict)
+        
+        # Random shunned cat
+        if "rsh_c" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_c(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_c', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("rsh_c", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                random_cat = choice(get_alive_cats(Cat))
+                addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                counter = 0
+
+                while (random_cat.ID == you.ID or random_cat.ID == cat.ID or addon_check is False or random_cat.shunned == 0):
+                    if counter == 30:
+                        return ""
+                    random_cat = choice(get_alive_cats(Cat))
+                    addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                    counter +=1
+
+                text = add_to_cat_dict("rsdh_c", cluster, x, rel, r, random_cat, text, cat_dict)
+
+        # Shunned kit
+        if "rsh_k" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_k(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_k', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            alive_kits = get_alive_status_cats(Cat, ["kitten", "newborn"])
+            if len(alive_kits) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_k", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_kit = choice(alive_kits)
+                addon_check = abbrev_addons(cat, alive_kit, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_kit.ID == you.ID or alive_kit.ID == cat.ID or addon_check is False or alive_kit.shunned == 0):
+                    alive_kit = choice(alive_kits)
+                    addon_check = abbrev_addons(cat, alive_kit, cluster, x, rel, r)
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    
+                text = add_to_cat_dict("rsh_k", cluster, x, rel, r, alive_kit, text, cat_dict)
+
+        # Shunned apprentice
+        if "rsh_a" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_a(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_a', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["apprentice"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_a", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_a", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned warrior
+        if "rsh_w" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_w(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_w', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["warrior"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_w", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_w", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned medicine cat or medicine cat apprentice
+        if "rsh_m" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_m(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_m', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["medicine cat", "medicine cat apprentice"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_a", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_m", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned mediator or mediator apprentice
+        if "rsh_d" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_d(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_d', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["mediator", "mediator apprentice"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_d", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_d", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned queen or queen's apprentice
+        if "rsh_q" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_q(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_q', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["queen", "queen's apprentice"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_q", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_q", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned elder
+        if "rsh_e" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'rsh_e(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)rsh_e', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            alive_apps = get_alive_status_cats(Cat, ["elder"])
+            if len(alive_apps) < 1:
+                return ""
+            
+            text, in_dict = cat_dict_check("rsh_e", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_app = choice(alive_apps)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False or alive_app.shunned == 0):
+                    counter+=1
+                    if counter == 30:
+                        return ""
+                    alive_app = choice(alive_apps)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+
+                text = add_to_cat_dict("rsh_e", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Shunned deputy
+        if "sh_d" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'sh_d(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)sh_d', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            random_cat = choice(get_alive_cats(Cat))
+            addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+            counter = 0
+
+            while (random_cat.ID == you.ID or random_cat.ID == cat.ID or addon_check is False or random_cat.shunned == 0 or random_cat.status != "deputy"):
+                if counter == 30:
+                    return ""
+                random_cat = choice(get_alive_cats(Cat))
+                addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                counter +=1
+            
+            text = add_to_cat_dict("sh_d", cluster, x, rel, r, random_cat, text, cat_dict)
+
+        # Shunned leader
+        if "sh_l" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'sh_l(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)sh_l', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            random_cat = choice(get_alive_cats(Cat))
+            addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+            counter = 0
+
+            while (random_cat.ID == you.ID or random_cat.ID == cat.ID or addon_check is False or random_cat.shunned == 0 or random_cat.status != "leader"):
+                if counter == 30:
+                    return ""
+                random_cat = choice(get_alive_cats(Cat))
+                addon_check = abbrev_addons(cat, random_cat, cluster, x, rel, r)
+                counter +=1
+            
+            text = add_to_cat_dict("sh_l", cluster, x, rel, r, random_cat, text, cat_dict)
+
+        # Warring Clan
+        if "w_cClan" in text:
+            if game.clan.war.get("at_war", False):
+                return ""
+            text = text.replace("w_c", str(game.clan.war["enemy"]))
+
+        # Random lost cat
+        if "l_c" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'l_c(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)l_c', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+            text, in_dict = cat_dict_check("l_c", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_outside_cats = [i for i in Cat.all_cats.values() if not i.dead and i.outside and not i.exiled]
+                if len(alive_outside_cats) <= 0:
+                    return ""
+                alive_app = choice(alive_outside_cats)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while alive_app.ID == you.ID or alive_app.ID == cat.ID or cat.status in ["rogue", "loner", "former Clancat", "kittypet"] or addon_check is False:
+                    alive_app = choice(alive_outside_cats)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 30:
+                        return ""
+                    
+                text = add_to_cat_dict("l_c", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Random exiled cat
+        if "e_c" in text:
+            cluster = False
+            rel = False
+            match = re.search(r'e_c(\w+)', text)
+            if match:
+                x = match.group(1).strip("_")
+                cluster = True
+            else:
+                x = ""
+            match2 = re.search(r'(\w+)e_c', text)
+            if match2:
+                r = match2.group(1).strip("_")
+                rel = True
+            else:
+                r = ""
+
+            text, in_dict = cat_dict_check("e_c", cluster, x, rel, r, text, cat_dict)
+
+            if in_dict is False:
+                alive_outside_cats = [i for i in Cat.all_cats.values() if not i.dead and i.outside and i.exiled]
+                if len(alive_outside_cats) <= 0:
+                    return ""
+                alive_app = choice(alive_outside_cats)
+                addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                counter = 0
+
+                while (alive_app.ID == you.ID or alive_app.ID == cat.ID or addon_check is False):
+                    alive_app = choice(alive_outside_cats)
+                    addon_check = abbrev_addons(cat, alive_app, cluster, x, rel, r)
+                    counter += 1
+                    if counter == 30:
+                        return ""
+
+                text = add_to_cat_dict("e_c", cluster, x, rel, r, alive_app, text, cat_dict)
+
+        # Dialogue focus cat
+        if game.clan.focus_cat is not None:
+            if "fc_c" in text:
+                cluster = False
+                rel = False
+                match = re.search(r'fc_c(\w+)', text)
+                if match:
+                    x = match.group(1).strip("_")
+                    cluster = True
+                else:
+                    x = ""
+                match2 = re.search(r'(\w+)fc_c', text)
+                if match2:
+                    r = match2.group(1).strip("_")
+                    rel = True
+                else:
+                    r = ""
+                addon_check = abbrev_addons(cat, game.clan.focus_cat, cluster, x, rel, r)
+
+                if game.clan.focus_cat.ID == cat.ID or game.clan.focus_cat.ID == game.clan.your_cat.ID or \
+                addon_check is False:
+                    return ""
+
+                text = add_to_cat_dict("fc_c", cluster, x, rel, r, game.clan.focus_cat, text, cat_dict)
+        else:
+            if "fc_c" in text:
+                print(game.clan.focus_cat)
+                return ""
+    except:
+        return ""
+
+    return text
+
 
 
 def quit(savesettings=False, clearevents=False):
