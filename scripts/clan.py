@@ -238,7 +238,7 @@ class Clan:
         self.add_to_starclan(self.instructor)
         self.all_clans = []
 
-         self.demon = Cat(status=choice(["apprentice", "mediator apprentice", "medicine cat apprentice", "warrior",
+        self.demon = Cat(status=choice(["apprentice", "mediator apprentice", "medicine cat apprentice", "warrior",
                                             "medicine cat", "leader", "mediator", "queen", "queen's apprentice", "deputy", "elder"]),
                             )
         self.demon.df = True
@@ -1305,7 +1305,7 @@ class Clan:
             self.load_freshkill_pile(game.clan)
         game.switches["error_message"] = ""
 
-         game.switches["error_message"] = "Error loading ---clan.json. Check player cat info"
+        game.switches["error_message"] = "Error loading ---clan.json. Check player cat info"
         if "your_cat" in clan_data:
             game.clan.your_cat = Cat.all_cats[clan_data["your_cat"]]
 
@@ -1366,7 +1366,7 @@ class Clan:
             "source_build": clan_data.get("source_build"),
         }
 
-     def load_accessories(self):
+    def load_accessories(self):
         if game.clan.clan_settings['all accessories']:
             for c in Cat.all_cats_list:
                 cat = c
