@@ -185,8 +185,8 @@
 			"vengeful"
 		],
 		"random_status_constraint": [
-			"healer",
-			"healer apprentice"
+			"medicine cat",
+			"medicine cat apprentice"
 		]
 	}
 ]
