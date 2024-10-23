@@ -15,8 +15,10 @@ from random import choice, randint
 
 import pygame
 import ujson
-
 from scripts.cat_relations.inheritance import Inheritance
+from scripts.game_structure.game_essentials import game
+from scripts.housekeeping.version import get_version_info, SAVE_VERSION_NUMBER
+from scripts.utility import update_sprite, get_current_season, quit, get_free_possible_mates, get_alive_status_cats, create_new_cat  # pylint: disable=redefined-builtin
 from scripts.cat.cats import Cat, cat_class, BACKSTORIES
 from scripts.cat.pelts import Pelt
 from scripts.cat.cats import Cat, cat_class
@@ -24,13 +26,12 @@ from scripts.cat.history import History
 from scripts.cat.names import names
 from scripts.cat.sprites import sprites
 from sys import exit  # pylint: disable=redefined-builtin
+from scripts.cat.names import Name
 from scripts.clan_resources.freshkill import FreshkillPile, Nutrition
 from scripts.events_module.generate_events import OngoingEvent
 from scripts.game_structure.game_essentials import game
 from scripts.housekeeping.datadir import get_save_dir
 from scripts.housekeeping.version import get_version_info, SAVE_VERSION_NUMBER
-from scripts.utility import update_sprite, get_current_season, quit, get_free_possible_mates, get_alive_status_cats, create_new_cat  # pylint: disable=redefined-builtin
-from scripts.cat.cats import Cat, cat_class, BACKSTORIES
 from scripts.utility import (
     get_current_season,
     quit,
