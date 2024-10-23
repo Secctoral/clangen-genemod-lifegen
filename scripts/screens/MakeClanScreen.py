@@ -10,13 +10,14 @@ from pygame_gui.core import ObjectID
 import scripts.screens.screens_core.screens_core
 from scripts.cat.cats import create_example_cats, create_cat, Cat
 from scripts.cat.names import names
+from scripts.cat.genotype import Genotype
+from scripts.cat.phenotype import Phenotype
 from scripts.cat.skills import Skill, SkillPath
 from scripts.cat.pelts import Pelt
 from scripts.clan import Clan
 from scripts.game_structure import image_cache
 from scripts.game_structure.game_essentials import (
-    game,
-    MANAGER
+    game
 )
 from scripts.game_structure.ui_elements import (
     UIImageButton,
@@ -42,7 +43,7 @@ class MakeClanScreen(Screens):
         "resources/images/pick_clan_screen/clan_name_frame.png"
      ).convert_alpha(),
     "name_clan": pygame.image.load(
-            #"resources/images/pick_clan_screen/name_clan_light.png"
+        "resources/images/pick_clan_screen/name_clan_light.png"
      ).convert_alpha(),
     "leader_img": pygame.image.load(
         "resources/images/pick_clan_screen/choose cat.png"
@@ -57,7 +58,7 @@ class MakeClanScreen(Screens):
         "resources/images/pick_clan_screen/clan_light.png"
      ).convert_alpha(),
     "bg_preview_border": pygame.image.load(
-        "resources/images/pick_clan_screen/bg_preview_border.png"
+        "resources/images/bg_preview_border.png"
      ).convert_alpha(),
     "your_name_img": pygame.image.load(
         "resources/images/pick_clan_screen/Your name screen.png"
@@ -70,15 +71,23 @@ class MakeClanScreen(Screens):
      ).convert_alpha(),
     # Customize Screen
     "sprite_preview_bg": pygame.image.load(
-        "resources/images/pick_clan_screen/sprite_preview.png"
+        "resources/images/sprite_preview.png"
      ).convert_alpha(),
     "poses_bg": pygame.image.load(
-        "resources/images/pick_clan_screen/poses_bg.png"
+        "resources/images/poses_bg.png"
      ).convert_alpha(),
     "choice_bg": pygame.image.load(
-        "resources/images/pick_clan_screen/custom_choice_bg.png"
+        "resources/images/custom_choice_bg.png"
      ).convert_alpha(),
 }
+    your_name_img = pygame.transform.scale(pygame.image.load(
+        'resources/images/pick_clan_screen/Your name screen.png').convert_alpha(), (1600, 1400))
+    your_name_img_dark = pygame.transform.scale(pygame.image.load(
+        'resources/images/pick_clan_screen/Your name screen darkmode.png').convert_alpha(), (1600, 1400))
+    your_name_txt1 = pygame.transform.scale(pygame.image.load(
+        'resources/images/pick_clan_screen/your name text1.png').convert_alpha(), (796, 52))
+    your_name_txt2 = pygame.transform.scale(pygame.image.load(
+        'resources/images/pick_clan_screen/your name text2.png').convert_alpha(), (536, 52))
 
 ## OLD / GENEMOD MAKE CLAN SCREEN; SAVED FOR REFERENCE
 #class MakeClanScreen(Screens):
@@ -188,15 +197,15 @@ class MakeClanScreen(Screens):
             ui_scale_dimensions((800, 700)),
         )
         self.leader_img = pygame.transform.scale(
-            self.ui_images["leader"],
+            self.ui_images["leader_img"],
             ui_scale_dimensions((800, 700)),
         )
         self.deputy_img = pygame.transform.scale(
-            self.ui_images["deputy"],
+            self.ui_images["deputy_img"],
             ui_scale_dimensions((800, 700)),
         )
         self.medic_img = pygame.transform.scale(
-            self.ui_images["medic"],
+            self.ui_images["medic_img"],
             ui_scale_dimensions((800, 700)),
         )
         self.clan_img = pygame.transform.scale(
@@ -222,8 +231,6 @@ class MakeClanScreen(Screens):
         self.clan_size = "medium"
         self.clan_age = "established"
         
-        self.genotype = genotype
-        self.phenotype = phenotype
         self.custom_cat = None
         self.elements = {}
         self.pname="SingleColour"
@@ -428,8 +435,6 @@ class MakeClanScreen(Screens):
             self.selected_cat = (
                 None  # Your selected cat now no longer exists. Sad. They go away.
             )
-            if self.elements["error_message"]:
-                self.elements["error_message"].hide()
             self.refresh_cat_images_and_info()  # Refresh all the images.
             self.rolls_left -= 1
             if game.config["clan_creation"]["rerolls"] == 3:
@@ -440,21 +445,14 @@ class MakeClanScreen(Screens):
                     event.ui_element.disable()
 
         elif event.ui_element in [self.elements["cat" + str(u)] for u in range(0, 12)]:
-            if pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                clicked_cat = event.ui_element.return_cat_object()
-                if clicked_cat.age not in ["newborn", "kitten", "adolescent"]:
-                    self.leader = clicked_cat
-                    self.selected_cat = None
-                    self.open_choose_deputy()
-            else:
-                self.selected_cat = event.ui_element.return_cat_object()
-                self.refresh_cat_images_and_info(self.selected_cat)
-                self.refresh_text_and_buttons()
-        elif event.ui_element == self.elements["select_cat"]:
-            self.leader = self.selected_cat
+            self.selected_cat = event.ui_element.return_cat_object()
+            self.refresh_cat_images_and_info(self.selected_cat)
+            self.refresh_text_and_buttons()
+        elif event.ui_element == self.elements['select_cat']:
+            self.your_cat = self.selected_cat
             self.selected_cat = None
-            self.open_choose_deputy()
-        elif event.ui_element == self.elements["previous_step"]:
+            self.open_name_cat()
+        elif event.ui_element == self.elements['previous_step']:
             self.clan_name = ""
             self.open_name_clan()
         elif event.ui_element == self.elements['customize']:
@@ -1157,10 +1155,6 @@ class MakeClanScreen(Screens):
                 )
             )
             self.elements["cat_info"].show()
-        else:
-            self.elements["next_step"].disable()
-            self.elements["cat_info"].hide()
-            self.elements["cat_name"].hide()
 
     def refresh_cat_images_and_info(self, selected=None):
         """Update the image of the cat selected in the middle. Info and image.
@@ -1919,7 +1913,7 @@ class MakeClanScreen(Screens):
         )
         self.text["leader"] = pygame_gui.elements.UILabel(
             ui_scale(pygame.Rect((0, 5), (-1, -1))),
-            text=f"Leader name: {self.leader.name.prefix}star",
+            text=f"Your name: {self.your_cat.name}",
             container=self.elements["text_container"],
             object_id=get_text_box_theme("#text_box_30_horizleft"),
             manager=MANAGER,
