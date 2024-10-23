@@ -38,44 +38,44 @@ from ..ui.icon import Icon
 class MakeClanScreen(Screens):
     # UI images
     ui_images = {
-    "clan_frame": = pygame.image.load(
+    "clan_frame": pygame.image.load(
         "resources/images/pick_clan_screen/clan_name_frame.png"
      ).convert_alpha(),
     "name_clan": pygame.image.load(
             #"resources/images/pick_clan_screen/name_clan_light.png"
      ).convert_alpha(),
-    "leader_img": = pygame.image.load(
+    "leader_img": pygame.image.load(
         "resources/images/pick_clan_screen/choose cat.png"
      ).convert_alpha(),
-    "deputy_img": = pygame.image.load(
+    "deputy_img": pygame.image.load(
         "resources/images/pick_clan_screen/deputy_light.png"
      ).convert_alpha(),
-    "medic_img": = pygame.image.load(
+    "medic_img": pygame.image.load(
         "resources/images/pick_clan_screen/med_light.png"
      ).convert_alpha(),
-    "clan_img": = pygame.image.load(
+    "clan_img": pygame.image.load(
         "resources/images/pick_clan_screen/clan_light.png"
      ).convert_alpha(),
-    "bg_preview_border": = pygame.image.load(
+    "bg_preview_border": pygame.image.load(
         "resources/images/pick_clan_screen/bg_preview_border.png"
      ).convert_alpha(),
-    "your_name_img": = pygame.image.load(
+    "your_name_img": pygame.image.load(
         "resources/images/pick_clan_screen/Your name screen.png"
      ).convert_alpha(),
-    "your_name_txt1": = pygame.image.load(
+    "your_name_txt1": pygame.image.load(
         "resources/images/pick_clan_screen/your name text1.png"
      ).convert_alpha(),
-    "your_name_txt2": = pygame.image.load(
+    "your_name_txt2": pygame.image.load(
         "resources/images/pick_clan_screen/your name text2.png"
      ).convert_alpha(),
     # Customize Screen
-    "sprite_preview_bg": = pygame.image.load(
+    "sprite_preview_bg": pygame.image.load(
         "resources/images/pick_clan_screen/sprite_preview.png"
      ).convert_alpha(),
-    "poses_bg": = pygame.image.load(
+    "poses_bg": pygame.image.load(
         "resources/images/pick_clan_screen/poses_bg.png"
      ).convert_alpha(),
-    "choice_bg": = pygame.image.load(
+    "choice_bg": pygame.image.load(
         "resources/images/pick_clan_screen/custom_choice_bg.png"
      ).convert_alpha(),
 }
@@ -222,10 +222,10 @@ class MakeClanScreen(Screens):
         self.clan_size = "medium"
         self.clan_age = "established"
         
+        self.genotype = genotype
+        self.phenotype = phenotype
         self.custom_cat = None
         self.elements = {}
-        genotype:Genotype,
-        phenotype:Phenotype,
         self.pname="SingleColour"
         self.colour="WHITE"
         self.white_patches=None
