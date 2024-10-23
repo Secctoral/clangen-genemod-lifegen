@@ -222,7 +222,7 @@ class Events:
                                         _val[1]))
                         Cat.fetch_cat(cat_id).faith -= round(random.uniform(-1,0), 2)
                         
-                        )
+
 
             Cat.grief_strings.clear()
 
