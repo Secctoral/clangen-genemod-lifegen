@@ -27,6 +27,7 @@ from scripts.game_structure.game_essentials import game
 from scripts.housekeeping.datadir import get_save_dir
 from scripts.housekeeping.version import get_version_info, SAVE_VERSION_NUMBER
 from scripts.utility import update_sprite, get_free_possible_mates, get_alive_status_cats, create_new_cat  # pylint: disable=redefined-builtin
+from scripts.cat.cats import Cat, cat_class, BACKSTORIES
 from scripts.utility import (
     get_current_season,
     quit,
@@ -226,7 +227,7 @@ class Clan:
         """
 
         self.instructor = Cat(status=choice(["apprentice", "mediator apprentice", "medicine cat apprentice", "warrior",
-                                             "medicine cat", "leader", "mediator", "deputy", "elder"]),
+                                             "medicine cat", "leader", "mediator", "queen", "queen's apprentice", "deputy", "elder"]),
                               )
         self.instructor.dead = True
         self.instructor.dead_for = randint(20, 200)
