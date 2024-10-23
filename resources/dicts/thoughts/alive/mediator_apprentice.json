@@ -58,7 +58,7 @@
         "random_status_constraint": [
             "mediator apprentice",
             "apprentice",
-            "healer apprentice"
+            "medicine cat apprentice"
         ],
         "random_living_status": [
             "living"
