@@ -989,7 +989,7 @@
         ]
     },
     {
-        "patrol_id": "gen_bord_medicine cat2",
+        "patrol_id": "gen_bord_healer2",
         "biome": ["any"],
         "season": ["any"],
         "types": ["border"],
@@ -1083,7 +1083,7 @@
         ]
     },
     {
-        "patrol_id": "gen_bord_medicine cat3",
+        "patrol_id": "gen_bord_healer3",
         "biome": ["any"],
         "season": ["any"],
         "types": ["border"],
@@ -1448,7 +1448,7 @@
         "max_cats": 6,
         "min_max_status": {
             "apprentice": [-1, -1],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "normal adult": [-1, -1]
         },
         "weight": 20,
@@ -1529,7 +1529,7 @@
         "max_cats": 6,
         "min_max_status": {
             "apprentice": [-1, -1],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "normal adult": [-1, -1]
         },
         "weight": 20,
@@ -1621,7 +1621,7 @@
         "min_max_status": {
             "apprentice": [-1, -1],
             "medicine cat": [1, 6],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "all apprentices": [-1, -1],
             "normal adult": [-1, -1]
         },
@@ -1704,7 +1704,7 @@
         "min_max_status": {
             "apprentice": [-1, -1],
             "medicine cat": [1, 6],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "all apprentices": [-1, -1],
             "normal adult": [-1, -1]
         },
@@ -1797,7 +1797,7 @@
         "min_max_status": {
             "apprentice": [-1, -1],
             "medicine cat apprentice": [1, 6],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "normal adult": [-1, -1]
         },
         "weight": 20,
@@ -1886,7 +1886,7 @@
         "min_max_status": {
             "apprentice": [-1, -1],
             "medicine cat apprentice": [1, 6],
-            "medicine cat cats": [1, 6],
+            "healer cats": [1, 6],
             "normal adult": [-1, -1]
         },
         "weight": 20,
