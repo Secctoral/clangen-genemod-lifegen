@@ -232,7 +232,7 @@ class Events:
             extra_event = None
             event = None
             for ghost in Cat.dead_cats:
-               if not ghost.dead_for > 1:
+                if not ghost.dead_for > 1:
                     ghost_names.append(str(ghost.name))
                 else:
                     continue # keeps cats who generate as dead out of death events
@@ -2727,7 +2727,7 @@ class Events:
                         f"They stare down at their Clanmates with unsheathed claws, "
                         f"promising a new era for the Clans."
                     )
-               else:
+                else:
                     c = random.choice([1, 2, 3])
                     moonplace_dict = {
                         "Beach": "Mooncove",
@@ -2936,7 +2936,7 @@ class Events:
                         if cat.is_disabled():
                             chance = int(chance / 2)
 
-                         chance += (cat.empathy * -1)
+                        chance += (cat.empathy * -1)
                         if chance <= 0:
                             chance = 1
 
@@ -3232,7 +3232,7 @@ class Events:
                 random_honor = "hard work"
 
             if cat.status in ["warrior", "medicine cat", "mediator", "queen"]:
-            History.add_app_ceremony(cat, random_honor)
+                History.add_app_ceremony(cat, random_honor)
 
         # lifegen filtering for shunned/forgiven
         # it's easier to do here lol
@@ -3374,7 +3374,7 @@ class Events:
 
         # remove duplicates
         involved_cats = list(set(involved_cats))
-         if cat.ID != game.clan.your_cat.ID and game.clan.your_cat.ID != cat.mentor:
+        if cat.ID != game.clan.your_cat.ID and game.clan.your_cat.ID != cat.mentor:
             game.cur_events_list.append(
                 Single_Event(f'{ceremony_text}', "ceremony", involved_cats))
         cat.faith += round(random.uniform(0,2), 2)
@@ -4227,7 +4227,7 @@ class Events:
                             else:
                                 previous_deputy_mention = ""
 
-                             if game.clan.deputy:
+                            if game.clan.deputy:
                                 if game.clan.deputy.shunned == 0:
                                     text = f"{game.clan.leader.name} chooses " \
                                         f"{random_cat.name} to take over " \
