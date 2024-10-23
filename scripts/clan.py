@@ -109,7 +109,7 @@ class Clan:
         your_cat=None,
         focus_cat=None,
         clan_age=None,
-        self_run_init_functions=False,
+        self_run_init_functions=False
     ):
         self.history = History()
         self.your_cat = your_cat
@@ -301,6 +301,8 @@ class Clan:
                 other_clan_name = choice(names.names_dict["normal_prefixes"] + names.names_dict["clan_prefixes"])
             other_clan = OtherClan(name=other_clan_name)
             self.all_clans.append(other_clan)
+        if 'other_med' in game.switches:
+            del game.switches['other_med']
 
 
         
