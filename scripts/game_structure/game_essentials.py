@@ -4,6 +4,7 @@ from ast import literal_eval
 from shutil import move as shutil_move
 
 import pygame
+import pygame_gui
 import ujson
 
 from scripts.event_class import Single_Event
@@ -28,6 +29,8 @@ class Game:
 
     cur_events_list = []
     ceremony_events_list = []
+    other_events_list = []
+    your_events_list = []
     birth_death_events_list = []
     relation_events_list = []
     health_events_list = []
@@ -135,6 +138,7 @@ class Game:
         "skip_conditions": [],
         "show_history_moons": False,
         "fps": 30,
+        'windows_dict': [],
         "war_rel_change_type": "neutral",
         "disallowed_symbol_tags": [],
         "audio_mute": False,
