@@ -131,7 +131,7 @@ class Clan:
         self.starting_season = starting_season
         self.instructor = None
         # This is the first cat in starclan, to "guide" the other dead cats there.
-         self.demon = None
+        self.demon = None
         # ^^ dark forest guide
         self.followingsc = followingsc
         self.biome = biome
