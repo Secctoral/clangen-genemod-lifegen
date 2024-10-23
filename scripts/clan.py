@@ -106,7 +106,7 @@ class Clan:
         your_cat=None,
         focus_cat=None,
         clan_age=None,
-        self_run_init_functions=True,
+        self_run_init_functions=False,
     ):
         self.history = History()
         self.your_cat = your_cat
