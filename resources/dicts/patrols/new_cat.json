@@ -996,7 +996,7 @@
         ]
     },
     {
-        "patrol_id": "gen_bord_medicine cat1",
+        "patrol_id": "gen_bord_healer1",
         "biome": ["any"],
         "season": ["any"],
         "types": ["border"],
@@ -1087,7 +1087,7 @@
         ]
     },
     {
-        "patrol_id": "gen_bord_medicine cat4",
+        "patrol_id": "gen_bord_healer4",
         "biome": ["any"],
         "season": ["any"],
         "types": ["border"],
