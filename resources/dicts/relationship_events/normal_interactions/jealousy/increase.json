@@ -28,8 +28,8 @@
 		"random_status_constraint": [
 			"mediator apprentice",
 			"apprentice",
-			"healer apprentice",
-			"healer",
+			"medicine cat apprentice",
+			"medicine cat",
 			"warrior",
 			"mediator",
 			"deputy"
@@ -45,7 +45,7 @@
 		],
 		"main_status_constraint": [
 			"apprentice",
-			"healer apprentice",
+			"medicine cat apprentice",
 			"mediator apprentice",
 			"warrior"
 		],
@@ -130,7 +130,7 @@
 		"main_status_constraint": [
 			"apprentice",
 			"mediator apprentice",
-			"healer apprentice"
+			"medicine cat apprentice"
 		],
 		"random_status_constraint": [
 			"kitten"
@@ -144,7 +144,7 @@
 		"id": "jel_inc_high1",
 		"intensity": "high",
 		"interactions": [
-			"m_c is jealous that r_c gets to do cool super secret healer things.",
+			"m_c is jealous that r_c gets to do cool super secret medicine cat things.",
 			"m_c thinks it's unfair that r_c always gets to go to Gatherings.",
 			"m_c is jealous that r_c always smells of beautiful fragrant herbs."
 		],
@@ -153,7 +153,7 @@
 			"mediator apprentice"
 		],
 		"random_status_constraint": [
-			"healer apprentice"
+			"medicine cat apprentice"
 		]
 	},
 	{
@@ -187,7 +187,7 @@
         	"random_status_constraint": [
             		"kitten",
             		"apprentice",
-            		"healer apprentice",
+            		"medicine cat apprentice",
             		"mediator apprentice",
             		"deputy",
             		"warrior"
