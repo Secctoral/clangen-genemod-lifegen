@@ -8,6 +8,10 @@ from random import choice
 from re import search as re_search
 from re import sub
 from typing import TYPE_CHECKING
+import platform
+import ujson
+from sys import exit
+import logging
 
 import pygame
 import pygame_gui
@@ -800,6 +804,21 @@ class PronounCreation(UIWindow):
             manager=MANAGER,
             container=self,
         )
+        self.box_labels["parent"] = pygame_gui.elements.UITextBox(
+            "Parent",
+            scale(pygame.Rect((88, 230), (100, 30))),
+            object_id="#text_box_30_horizcenter_spacing_95",
+            manager=MANAGER,
+            container=self,
+        )
+
+        self.box_labels["sibling"] = pygame_gui.elements.UITextBox(
+            "Sibling",
+            scale(pygame.Rect((213, 230), (100, 30))),
+            object_id="#text_box_30_horizcenter_spacing_95",
+            manager=MANAGER,
+            container=self,
+        )
         self.checkbox_label["singular_label"] = pygame_gui.elements.UITextBox(
             "Singular",
             ui_scale(pygame.Rect((128, 285), (100, 30))),
@@ -852,6 +871,26 @@ class PronounCreation(UIWindow):
             container=self,
         )
 
+
+        self.boxes["parent"] = pygame_gui.elements.UITextEntryLine(
+            ui_scale(pygame.Rect((90, 235), (200, 60))),
+            placeholder_text=self.the_cat.pronouns[0]["parent"],
+            manager=MANAGER,
+            container=self,
+        )
+
+        self.boxes["sibling"] = pygame_gui.elements.UITextEntryLine(
+            ui_scale(pygame.Rect((215, 235), (100, 30))),
+            placeholder_text=self.the_cat.pronouns[0]["sibling"],
+            manager=MANAGER,
+            container=self,
+        )
+        
+        # setting parent/sibling text right away
+        # so they can go unedited when creating new pronouns
+        self.boxes["parent"].set_text(self.the_cat.pronouns[0]["parent"])
+        self.boxes["sibling"].set_text(self.the_cat.pronouns[0]["sibling"])
+
         # Save Confirmation
         self.pronoun_added = pygame_gui.elements.UITextBox(
             f"Pronoun saved and added to presets!",
@@ -861,6 +900,7 @@ class PronounCreation(UIWindow):
             manager=MANAGER,
             container=self,
         )
+        
 
         # Add buttons
         self.buttons = {}
@@ -941,6 +981,8 @@ class PronounCreation(UIWindow):
             "inposs": "",
             "self": "",
             "conju": 1,
+            "parent": "",
+            "sibling": ""
         }
 
         if sub(r"[^A-Za-z0-9 ]+", "", self.boxes["subject"].get_text()) != "":
@@ -963,6 +1005,14 @@ class PronounCreation(UIWindow):
             pronoun_template["self"] = sub(
                 r"[^A-Za-z0-9 ]+", "", self.boxes["self"].get_text()
             )
+        if sub(r"[^A-Za-z0-9 ]+", "", self.boxes["parent"].get_text()) != "":
+            pronoun_template["parent"] = sub(
+                r"[^A-Za-z0-9 ]+", "", self.boxes["parent"].get_text()
+            )
+        if sub(r"[^A-Za-z0-9 ]+", "", self.boxes["sibling"].get_text()) != "":
+            pronoun_template["sibling"] = sub(
+                r"[^A-Za-z0-9 ]+", "", self.boxes["sibling"].get_text()
+            )
         if self.conju == 2:
             pronoun_template["conju"] = 2
         # if save button or add to cat is pressed, set 'name' as a counting number thing as an invisible identifier
@@ -983,6 +1033,8 @@ class PronounCreation(UIWindow):
         values.append(self.is_box_full(self.boxes["poss"]))
         values.append(self.is_box_full(self.boxes["inposs"]))
         values.append(self.is_box_full(self.boxes["self"]))
+        values.append(self.is_box_full(self.boxes["parent"]))
+        values.append(self.is_box_full(self.boxes["sibling"]))
         for value in values:
             if value is False:
                 return False
@@ -1034,6 +1086,8 @@ class PronounCreation(UIWindow):
         text += poss.capitalize()
         text += f"That den is {pronouns['inposs']}. <br>"
         text += f"This cat hunts by {pronouns['self']}.<br>"
+        text += f"This cat wants to be a {pronouns['parent']} someday.<br>"
+        text += f"This cat is a good {pronouns['sibling']}.<br>"
         # Full Sentence Example, doesn't fit.
         """sentence = f"{pronouns['poss']} keen sense alerted {pronouns['object']} to prey and {pronouns['subject']} decided to treat {pronouns['self']} by catching prey that would be {pronouns['inposs']} alone to eat. "
         if pronouns["conju"] == 2:
@@ -1899,6 +1953,551 @@ class EventLoading(UIWindow):
         super().kill()
 
 
+class PickPath(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((250, 200), (400, 250))),
+                         window_display_title='Choose your Path',
+                         object_id='#game_over_window',
+                         resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        self.pick_path_message = UITextBoxTweaked(
+            f"You have an important decision to make...",
+            ui_scale(pygame.Rect((20, 20), (360, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((15, 95), (75, 75))),
+            "",
+            object_id="#med",
+            container=self,
+            tool_tip_text='Choose to become a medicine cat apprentice'
+        )
+        self.not_yet_button = UIImageButton(
+            ui_scale(pygame.Rect((110, 95), (75, 75))),
+            "",
+            object_id="#warrior",
+            container=self,
+            tool_tip_text='Choose to become a warrior apprentice'
+
+        )
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((205, 95), (75, 75))),
+            "",
+            object_id="#mediator",
+            container=self,
+            tool_tip_text='Choose to become a mediator apprentice'
+
+        )
+        self.queen_button = UIImageButton(
+            ui_scale(pygame.Rect((300, 95), (75, 75))),
+            "",
+            object_id="#queen",
+            container=self,
+            tool_tip_text="Choose to become a queen's apprentice"
+
+        )
+        self.random_button = UIImageButton(
+            ui_scale(pygame.Rect((173, 370), (75, 75))),
+            "",
+            object_id="#random_dice_button",
+            container=self,
+            tool_tip_text='Random'
+
+        )
+
+        self.not_yet_button.enable()
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+        self.random_button.enable()
+
+    def process_event(self, event):
+        super().process_event(event)
+
+        try:
+
+            if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+                if event.ui_element == self.begin_anew_button:
+                    game.switches['window_open'] = False
+                    if game.clan.your_cat.moons < 12:
+                        status = 'medicine cat apprentice'
+                    else:
+                        status = 'medicine cat'
+                elif event.ui_element == self.not_yet_button:
+                    game.switches['window_open'] = False
+                    if game.clan.your_cat.moons < 12:
+                        status = 'apprentice'
+                    else:
+                        status = 'warrior'
+                elif event.ui_element == self.mediator_button:
+                    game.switches['window_open'] = False
+                    if game.clan.your_cat.moons < 12:
+                        status = 'mediator apprentice'
+                    else:
+                        status = 'mediator'
+                elif event.ui_element == self.queen_button:
+                    game.switches['window_open'] = False
+                    if game.clan.your_cat.moons < 12:
+                        status = "queen's apprentice"
+                    else:
+                        status = "queen"
+                elif event.ui_element == self.random_button:
+                    game.switches['window_open'] = False
+                    if game.clan.your_cat.moons < 12:
+                        status = random.choice(['mediator apprentice','apprentice','medicine cat apprentice', "queen's apprentice"])
+                    else:
+                        status = random.choice(['mediator','warrior','medicine cat', "queen"])
+                
+                game.clan.your_cat.status_change(status)
+                self.kill()
+        except:
+            print('Error with PickPath window!')
+            
+                
+class DeathScreen(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((200, 200), (490, 250))),
+                         window_display_title='You have died',
+                         object_id='#game_over_window',
+                         resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        self.pick_path_message = UITextBoxTweaked(
+            f"What will you do now?",
+            ui_scale(pygame.Rect((20, 20), (435, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((65, 70), (75, 75))),
+            "",
+            object_id="#random_dice_button",
+            container=self,
+            tool_tip_text='Start a new Clan'
+        )
+        
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((155, 70), (75, 75))),
+            "",
+            object_id="#unknown_residence_button",
+            container=self,
+            tool_tip_text='Be reborn'
+
+        )
+        
+        self.mediator_button2 = UIImageButton(
+            ui_scale(pygame.Rect((245, 70), (75, 75))),
+            "",
+            object_id="#leader_ceremony_button",
+            container=self,
+            tool_tip_text='Revive'
+        )
+
+        self.mediator_button4 = UIImageButton(
+            ui_scale(pygame.Rect((335, 70), (75, 75))),
+            "",
+            object_id="#queen_activity_button",
+            container=self,
+            tool_tip_text="Start a new life"
+        )
+
+        self.mediator_button3 = UIImageButton(
+            ui_scale(pygame.Rect((115, 165), (249, 48))),
+            "",
+            object_id="#continue_dead_button",
+            container=self,
+        )
+
+        
+
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+        if game.clan.your_cat.revives < 5:
+            self.mediator_button2.enable()
+        if (game.clan.your_cat.dead_for >= game.config["fading"]["age_to_fade"]) and game.clan.your_cat.prevent_fading == False:
+            self.mediator_button2.disable()
+        self.mediator_button3.enable()
+        self.mediator_button4.enable()
+
+    def process_event(self, event):
+        super().process_event(event)
+
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            if event.ui_element == self.begin_anew_button: 
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                game.switches['cur_screen'] = 'start screen'
+                game.switches['continue_after_death'] = False
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.mediator_button2.kill()
+                self.mediator_button3.kill()
+                self.mediator_button4.kill()
+                self.kill()
+                game.all_screens['events screen'].exit_screen()
+            elif event.ui_element == self.mediator_button:
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                game.switches['cur_screen'] = "choose reborn screen"
+                game.switches['continue_after_death'] = False
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.mediator_button2.kill()
+                self.mediator_button3.kill()
+                self.mediator_button4.kill()
+                self.kill()
+                game.all_screens['events screen'].exit_screen()
+            elif event.ui_element == self.mediator_button2:
+                game.clan.your_cat.revives +=1
+                game.clan.your_cat.dead = False
+                game.clan.your_cat.df = False
+                if not game.clan.your_cat.outside:
+                    game.clan.your_cat.outside = False
+                if game.clan.your_cat.status in ["rogue", "kittypet", "former Clancat", "loner"]:
+                    game.clan.your_cat.status = "exiled"
+                    # cant play as an outsider yet gotta cheese it for now
+                game.clan.your_cat.dead_for = 0
+                game.clan.your_cat.moons+=1
+                game.clan.your_cat.update_mentor()
+                game.switches['continue_after_death'] = False
+                if game.clan.your_cat.outside:
+                    game.clan.add_to_clan(game.clan.your_cat)
+                if game.clan.your_cat.ID in game.clan.starclan_cats:
+                    game.clan.starclan_cats.remove(game.clan.your_cat.ID)
+                if game.clan.your_cat.ID in game.clan.darkforest_cats:
+                    game.clan.darkforest_cats.remove(game.clan.your_cat.ID)
+                if game.clan.your_cat.ID in game.clan.unknown_cats:
+                    game.clan.unknown_cats.remove(game.clan.your_cat.ID)
+                you = game.clan.your_cat
+                
+                if you.moons == 0 and you.status != "newborn":
+                    you.status = 'newborn'
+                elif you.moons < 6 and you.status != "kitten":
+                    you.status = "kitten"
+                elif you.moons >= 6 and you.status == "kitten":
+                    you.status = "apprentice"
+                    you.name.status = "apprentice"
+
+                game.clan.your_cat.thought = "Is surprised to find themselves back in the Clan"
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                with open("resources/dicts/events/lifegen_events/revival.json", "r") as read_file:
+                    revival_json = ujson.loads(read_file.read())['revival']
+                
+                game.next_events_list.append(Single_Event(choice(revival_json), 'alert'))
+                game.switches['cur_screen'] = "events screen"
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.mediator_button2.kill()
+                self.mediator_button3.kill()
+                self.mediator_button4.kill()
+                self.kill()
+            elif event.ui_element == self.mediator_button3:
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                game.switches['cur_screen'] = "events screen"
+                game.switches['continue_after_death'] = True
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.mediator_button2.kill()
+                self.mediator_button3.kill()
+                self.mediator_button4.kill()
+                self.kill()
+            elif event.ui_element == self.mediator_button4:
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                game.switches['cur_screen'] = "new life screen"
+                game.switches['continue_after_death'] = False
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.mediator_button2.kill()
+                self.mediator_button3.kill()
+                self.mediator_button4.kill()
+                self.kill()
+                game.all_screens['events screen'].exit_screen()
+                
+class DeputyScreen(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((250, 200), (300, 250))),
+                        window_display_title='Choose your deputy',
+                        object_id='#game_over_window',
+                        resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        self.pick_path_message = UITextBoxTweaked(
+            f"Choose your deputy",
+            ui_scale(pygame.Rect((20, 20), (250, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((65, 95), (75, 75))),
+            "",
+            object_id="#random_dice_button",
+            container=self,
+            tool_tip_text='Skip'
+        )
+        
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((155, 95), (75, 75))),
+            "",
+            object_id="#unknown_residence_button",
+            container=self,
+            tool_tip_text='Choose deputy'
+
+        )
+
+        
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+
+
+    def process_event(self, event):
+        super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            if event.ui_element == self.begin_anew_button:
+                game.last_screen_forupdate = None
+                game.switches['window_open'] = False
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.kill()
+            elif event.ui_element == self.mediator_button:
+                game.last_screen_forupdate = None
+                if game.clan.deputy:
+                    game.clan.deputy.status_change('warrior')
+                game.switches['window_open'] = False
+                game.switches['cur_screen'] = "deputy screen"
+                self.begin_anew_button.kill()
+                self.pick_path_message.kill()
+                self.mediator_button.kill()
+                self.kill()
+                game.all_screens['events screen'].exit_screen()
+                
+class NameKitsWindow(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((250, 200), (300, 250))),
+                         window_display_title='Name Kits',
+                         object_id='#game_over_window',
+                         resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        self.pick_path_message = UITextBoxTweaked(
+            f"Name your kits",
+            ui_scale(pygame.Rect((20, 20), (250, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((65, 95), (75, 75))),
+            "",
+            object_id="#random_dice_button",
+            container=self,
+            tool_tip_text='Randomize names'
+        )
+        
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((155, 95), (75, 75))),
+            "",
+            object_id="#unknown_residence_button",
+            container=self,
+            tool_tip_text='Choose names'
+
+        )
+
+        
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+
+
+    def process_event(self, event):
+        super().process_event(event)
+        if game.switches['window_open']:
+            pass
+
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            try:
+                if event.ui_element == self.begin_anew_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                elif event.ui_element == self.mediator_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    game.switches['cur_screen'] = "name kits screen"
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                    game.all_screens['events screen'].exit_screen()
+            except:
+                print("failure with kits window")
+
+                
+class MateScreen(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((250, 200), (300, 250))),
+                         window_display_title='Choose your mate',
+                         object_id='#game_over_window',
+                         resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        self.mate = game.switches['new_mate']
+        self.pick_path_message = UITextBoxTweaked(
+            f"{self.mate.name} confesses their feelings to you.",
+            ui_scale(pygame.Rect((20, 20), (260, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((65, 95), (75, 75))),
+            "",
+            object_id="#your_clan_button",
+            container=self,
+            tool_tip_text='Accept and become mates'
+        )
+        
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((155, 95), (75, 75))),
+            "",
+            object_id="#outside_clan_button",
+            container=self,
+            tool_tip_text='Reject'
+
+        )
+        
+
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+
+
+
+    def process_event(self, event):
+        super().process_event(event)
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            try:
+                if event.ui_element == self.begin_anew_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    # game.switch_screens = True                    
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                    game.clan.your_cat.set_mate(game.switches['new_mate'])
+                    game.switches['accept'] = True
+
+                elif event.ui_element == self.mediator_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    # game.switch_screens = True
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                    game.switches['new_mate'].relationships[game.clan.your_cat.ID].romantic_love = 0
+                    game.clan.your_cat.relationships[game.switches['new_mate'].ID].comfortable -= 10
+                    game.switches['reject'] = True
+            except:
+                print("error with mate screen")
+
+class RetireScreen(UIWindow):
+    def __init__(self, last_screen):
+        super().__init__(ui_scale(pygame.Rect((250, 200), (300, 250))),
+                         window_display_title='Choose to retire',
+                         object_id='#game_over_window',
+                         resizable=False)
+        self.set_blocking(True)
+        game.switches['window_open'] = True
+        self.clan_name = str(game.clan.name + 'Clan')
+        self.last_screen = last_screen
+        game.switches['retire'] = False
+        game.switches['retire_reject'] = False
+        self.pick_path_message = UITextBoxTweaked(
+            f"You're asked if you would like to retire",
+            ui_scale(pygame.Rect((20, 20), (260, -1))),
+            line_spacing=1,
+            object_id="#text_box_30_horizcenter",
+            container=self
+        )
+
+        self.begin_anew_button = UIImageButton(
+            ui_scale(pygame.Rect((65, 95), (75, 75))),
+            "",
+            object_id="#your_clan_button",
+            container=self,
+            tool_tip_text='Accept and become an elder'
+        )
+        
+        self.mediator_button = UIImageButton(
+            ui_scale(pygame.Rect((155, 95), (75, 75))),
+            "",
+            object_id="#outside_clan_button",
+            container=self,
+            tool_tip_text='Reject'
+
+        )
+        
+        self.begin_anew_button.enable()
+        self.mediator_button.enable()
+
+
+
+    def process_event(self, event):
+        super().process_event(event)
+
+        if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            try:
+                if event.ui_element == self.begin_anew_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    # game.switch_screens = True                    
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                    game.switches['retire'] = True
+                    game.clan.your_cat.status_change('elder')
+                elif event.ui_element == self.mediator_button:
+                    game.last_screen_forupdate = None
+                    game.switches['window_open'] = False
+                    # game.switch_screens = True
+                    self.begin_anew_button.kill()
+                    self.pick_path_message.kill()
+                    self.mediator_button.kill()
+                    self.kill()
+                    game.switches['retire_reject'] = True
+            except:
+                print("error with retire screen")
 class ChangeCatToggles(UIWindow):
     """This window allows the user to edit various cat behavior toggles"""
 
@@ -1948,6 +2547,13 @@ class ChangeCatToggles(UIWindow):
             ui_scale(pygame.Rect(55, 100, -1, 32)),
             object_id="#text_box_30_horizleft_pad_0_8",
             container=self,
+        )
+        
+        self.text_5 = pygame_gui.elements.UITextBox(
+            "Set neutral faith",
+            ui_scale(pygame.Rect(55, 125, -1, 32)), 
+            object_id="#text_box_30_horizleft_pad_0_8",
+            container=self
         )
 
         # Text
@@ -2022,6 +2628,22 @@ class ChangeCatToggles(UIWindow):
 
         self.checkboxes["prevent_mates"] = UIImageButton(
             ui_scale(pygame.Rect((22, 100), (34, 34))),
+            "",
+            container=self,
+            object_id=box_type,
+            tool_tip_text=tool_tip,
+        )
+        
+        #No faith
+        if self.the_cat.no_faith:
+            box_type = "@checked_checkbox"
+            tool_tip = "Lock this cat's faith to 0."
+        else:
+            box_type = "@unchecked_checkbox"
+            tool_tip = "Lock this cat's faith to 0."
+        
+        self.checkboxes["no_faith"] = UIImageButton(
+            ui_scale(pygame.Rect((22, 100), (34,34))),
             "",
             container=self,
             object_id=box_type,
