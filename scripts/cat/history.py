@@ -17,7 +17,8 @@ class History:
                  possible_history=None,
                  died_by=None,
                  scar_events=None,
-                 murder=None
+                 murder=None,
+                 wrong_placement=False
                  ):
         self.beginning = beginning if beginning else {}
         self.mentor_influence = mentor_influence if mentor_influence else {"trait": {}, "skill": {}}
@@ -27,6 +28,7 @@ class History:
         self.died_by = died_by if died_by else []
         self.scar_events = scar_events if scar_events else []
         self.murder = murder if murder else {}
+        self.wrong_placement = wrong_placement if wrong_placement else False
 
         # fix 'old' history save bugs
         if type(self.mentor_influence["trait"]) is type(None):
@@ -148,6 +150,7 @@ class History:
             "died_by": cat.history.died_by,
             "scar_events": cat.history.scar_events,
             "murder": cat.history.murder,
+            "wrong_placement": cat.history.wrong_placement
         }
         return history_dict
 
@@ -166,13 +169,18 @@ class History:
             return
         History.check_load(cat)
 
-        cat.history.beginning = {
-            "clan_born": clan_born,
-            "birth_season": game.clan.current_season if clan_born else None,
-            "age": cat.moons,
+        if cat.df is True:
+
+            cat.history.beginning = {
             "moon": game.clan.age
         }
-
+        else:
+            cat.history.beginning = {
+                "clan_born": clan_born,
+                "birth_season": game.clan.current_season if clan_born else None,
+                "age": cat.moons,
+                "moon": game.clan.age
+            }
     @staticmethod
     def add_mentor_facet_influence_strings(cat):
         """
@@ -269,6 +277,26 @@ class History:
             SkillPath.CLAIRVOYANT: ["predicting the future"],
             SkillPath.PROPHET: ["understanding prophecies"],
             SkillPath.GHOST: ["connecting to the afterlife"]
+            SkillPath.EXPLORER: ["exploring unknown areas"],
+            SkillPath.TRACKER: ["tracking down scents"],
+            SkillPath.ARTISTAN: ["decorating dens"],
+            SkillPath.GUARDIAN: ["guarding the camp"],
+            SkillPath.TUNNELER: ["tunneling"],
+            SkillPath.NAVIGATOR: ["navigating unknown territory"],
+            SkillPath.SONG: ["using their voice"],
+            SkillPath.GRACE: ["watching where they step"],
+            SkillPath.CLEAN: ["keeping themself tidy"],
+            SkillPath.INNOVATOR: ["solving problems"],
+            SkillPath.COMFORTER: ["comforting others"],
+            SkillPath.MATCHMAKER: ["matchmaking"],
+            SkillPath.THINKER: ["thinking outside of the box"],
+            SkillPath.COOPERATIVE: ["being a team player"],
+            SkillPath.SCHOLAR: ["learning new things"],
+            SkillPath.TIME: ["managing their time"],
+            SkillPath.TREASURE: ["finding gifts"],
+            SkillPath.FISHER: ["fishing"],
+            SkillPath.LANGUAGE: ["using their words"],
+            SkillPath.SLEEPER: ["self-care"]
         }
 
         for _ment in cat.history.mentor_influence["skill"]:
@@ -664,6 +692,20 @@ class History:
         victim = cat_class.fetch_cat(victim)
         murder_history = History.get_murders(cat)
         victim_history = History.get_murders(victim)
+        
+        if cat.shunned == 0 and shunned:
+            cat.shunned = 1
+            cat.thought = "Is upset that they have been shunned"
+            cat.faith -= 0.5
+
+            if random.randint(1,4) == 1:
+                cat.get_injured("guilt")
+
+            for app in cat.apprentice:
+                fetched_cat = cat_class.fetch_cat(app)
+                if fetched_cat:
+                    fetched_cat.update_mentor()
+                cat.update_mentor()
 
         if murder_history:
             if "is_murderer" in murder_history:
