@@ -132,7 +132,15 @@ class Relationship:
                 in_de_crease,
                 intensity,
             )
-            return
+            possible_interactions = [
+                SingleInteraction(
+                    "fall_back",
+                    "Any",
+                    "Any",
+                    "medium",
+                    ["Default string, this should never appear."],
+                )
+            ]
 
         # check if the current interaction id is already used and us another if so
         chosen_interaction = choice(possible_interactions)
