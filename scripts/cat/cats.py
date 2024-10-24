@@ -4267,18 +4267,52 @@ def create_cat(status, moons=None, biome=None, kittypet=False):
 
 
 # Twelve example cats
-def create_example_cats():
-    warrior_indices = sample(range(12), 3)
-
-    for cat_index in range(12):
-        if cat_index in warrior_indices:
-            game.choose_cats[cat_index] = create_cat(status="warrior", kittypet=True)
+e = sample(range(12), 3)
+    not_allowed = ['NOPAW', 'NOTAIL', 'HALFTAIL', 'NOEAR', 'BOTHBLIND', 'RIGHTBLIND', 'LEFTBLIND', 'BRIGHTHEART',
+                   'NOLEFTEAR', 'NORIGHTEAR', 'MANLEG']
+    for a in range(12):
+        if a in e:
+            game.choose_cats[a] = Cat(status='kitten', biome=None)
         else:
-            random_status = choice(
-                ["kitten", "apprentice", "warrior", "warrior", "elder"]
-            )
-            game.choose_cats[cat_index] = create_cat(status=random_status, kittypet=True)
+            game.choose_cats[a] = Cat(status=choice(
+                ['kitten']), biome=None)
+        if game.choose_cats[a].moons >= 160:
+            game.choose_cats[a].moons = choice(range(120, 155))
+        elif game.choose_cats[a].moons == 0:
+            game.choose_cats[a].moons = choice([1, 2, 3, 4, 5])
+        for scar in game.choose_cats[a].pelt.scars:
+            if scar in not_allowed:
+                game.choose_cats[a].pelt.scars.remove(scar)
+            
+        chance = game.config["cat_generation"]["base_permanent_condition"]
+        if not int(random() * chance):
+            possible_conditions = []
+            for condition in PERMANENT:
+                if PERMANENT[condition]['congenital'] not in ['always', 'sometimes']:
+                    continue
+                # next part ensures that a kit won't get a condition that takes too long to reveal
+                age = game.choose_cats[a].moons
+                leeway = 5 - (PERMANENT[condition]['moons_until'] + 1)
+                if age > leeway:
+                    continue
+                possible_conditions.append(condition)
+                
+            if possible_conditions:
+                chosen_condition = choice(possible_conditions)
+                born_with = False
+                if PERMANENT[chosen_condition]['congenital'] in ['always', 'sometimes']:
+                    born_with = True
 
+                game.choose_cats[a].get_permanent_condition(chosen_condition, born_with)
+                if game.choose_cats[a].permanent_condition[chosen_condition]["moons_until"] == 0:
+                    game.choose_cats[a].permanent_condition[chosen_condition]["moons_until"] = -2
+
+                # assign scars
+                if chosen_condition in ['lost a leg', 'born without a leg']:
+                    game.choose_cats[a].pelt.scars.append('NOPAW')
+                elif chosen_condition in ['lost their tail', 'born without a tail']:
+                    game.choose_cats[a].pelt.scars.append("NOTAIL")
+        #update_sprite(game.choose_cats[a])
 
 # CAT CLASS ITEMS
 cat_class = Cat(example=True)
