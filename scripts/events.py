@@ -12,11 +12,13 @@ import traceback
 from collections import Counter
 
 import ujson
+import re
 
 from scripts.cat.cats import Cat, cat_class, BACKSTORIES
 from scripts.cat.pelts import Pelt
 from scripts.cat.history import History
 from scripts.cat.names import Name
+from scripts.cat.pelts import Pelt
 from scripts.clan import HERBS
 from scripts.clan import Clan
 from scripts.clan_resources.freshkill import FRESHKILL_EVENT_ACTIVE
@@ -133,6 +135,8 @@ class Events:
                 "apprentice",
                 "mediator",
                 "mediator apprentice",
+                "queen",
+                "queen's apprentice"
             }
             and not cat.dead
             and not cat.outside
