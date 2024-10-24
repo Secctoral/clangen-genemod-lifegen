@@ -125,6 +125,9 @@ class MakeClanScreen(Screens):
         self.menu_warning = None
 
     def screen_switches(self):
+        super().screen_switches()
+        self.show_mute_buttons()
+        self.set_bg("default", "mainmenu_bg")
 
         # Reset variables
         self.game_mode = 'expanded'
@@ -604,8 +607,6 @@ class MakeClanScreen(Screens):
         return super().exit_screen()
 
     def on_use(self):
-        super().on_use()
-
         # Don't allow someone to enter no name for their clan
         if self.sub_screen == "name clan":
             if self.elements["name_entry"].get_text() == "":
@@ -1066,14 +1067,13 @@ class MakeClanScreen(Screens):
                     + str(selected.personality.trait)
                     + "\n"
                     + str(selected.skills.skill_string())
-                )
+                ))
             if selected.permanent_condition:
 
                 self.elements['cat_info'].set_text(selected.genderalign + "\n" +
                                                    str(selected.personality.trait) + "\n" +
                                                    str(selected.skills.skill_string()) + "\n" +
                                                    "permanent condition: " + list(selected.permanent_condition.keys())[0])
-            )
             self.elements["cat_info"].show()
 
     def refresh_cat_images_and_info(self, selected=None):
@@ -1934,12 +1934,16 @@ class MakeClanScreen(Screens):
             biome=self.biome_selected,
             camp_bg=convert_camp[self.selected_camp_tab],
             symbol=self.symbol_selected,
-            self.game_mode, self.members,
+            game_mode="expanded",
+            starting_members=self.members,
             starting_season=self.selected_season,
-            your_cat=self.your_cat
+            your_cat=self.your_cat,
+            clan_age=self.clan_age
         )
         game.clan.your_cat.moons = -1
         game.clan.create_clan()
+        if self.clan_age == "established":
+            game.clan.leader_lives = random.randint(1,9)
         # game.clan.starclan_cats.clear()
         game.cur_events_list.clear()
         game.herb_events_list.clear()
