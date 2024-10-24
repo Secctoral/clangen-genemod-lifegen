@@ -1517,7 +1517,6 @@ class MakeClanScreen(Screens):
             "",
             object_id="#recruit_button",
             starting_height=2,
-            visible=False,
             manager=MANAGER,
         )
 
@@ -1909,7 +1908,7 @@ class MakeClanScreen(Screens):
             sound_id="save",
         )
         self.elements["save_confirm"] = pygame_gui.elements.UITextBox(
-            "Welcome to the world, ' + self.your_cat.name.prefix + 'kit!",
+            'Welcome to the world, ' + self.your_cat.name.prefix + 'kit!',
             ui_scale(pygame.Rect((100, 135), (600, 30))),
             object_id=get_text_box_theme("#text_box_30_horizcenter"),
             manager=MANAGER,
