@@ -347,6 +347,7 @@ class FreshkillPile:
             for cat in living_cats
             if "pregnant" in cat.injuries and cat.ID not in queen_dict.keys()
         ]
+        shunned_cats = [cat for cat in living_cats if cat.shunned]
 
         # first split nutrition information into low nutrition and satisfied
         ration_prey = game.clan.clan_settings["ration prey"] if game.clan else False
