@@ -10,7 +10,7 @@ import logging
 import re
 from itertools import combinations
 from math import floor
-from random import choice, choices, randint, random, sample, randrange, getrandbits
+from random import choice, choices, randint, random, sample, randrange, getrandbits, gauss
 from sys import exit as sys_exit
 from copy import deepcopy
 from typing import List, Tuple
@@ -874,6 +874,7 @@ def create_new_cat(
     gender: str = None,
     thought: str = "Is looking around the camp with wonder",
     alive: bool = True,
+    df:bool=False,
     outside: bool = False,
     parent1: str = None,
     parent2: str = None,
