@@ -79,12 +79,14 @@ class Name:
         tortiepattern=None,
         biome=None,
         specsuffix_hidden=False,
+        shunned=0,
         load_existing_name=False,
     ):
         self.status = status
         self.prefix = prefix
         self.suffix = suffix
         self.specsuffix_hidden = specsuffix_hidden
+        self.shunned = shunned
 
         name_fixpref = False
         # Set prefix
