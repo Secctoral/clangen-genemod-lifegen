@@ -4267,7 +4267,8 @@ def create_cat(status, moons=None, biome=None, kittypet=False):
 
 
 # Twelve example cats
-e = sample(range(12), 3)
+def create_example_cats():
+    e = sample(range(12), 3)
     not_allowed = ['NOPAW', 'NOTAIL', 'HALFTAIL', 'NOEAR', 'BOTHBLIND', 'RIGHTBLIND', 'LEFTBLIND', 'BRIGHTHEART',
                    'NOLEFTEAR', 'NORIGHTEAR', 'MANLEG']
     for a in range(12):
