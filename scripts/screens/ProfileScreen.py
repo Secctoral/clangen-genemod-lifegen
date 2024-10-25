@@ -13,6 +13,7 @@ import ujson
 
 from scripts.cat.cats import Cat, BACKSTORIES
 from scripts.cat.pelts import Pelt
+from scripts.events_module.relationship.pregnancy_events import Pregnancy_Events
 from scripts.clan_resources.freshkill import FRESHKILL_ACTIVE
 from scripts.game_structure import image_cache
 from scripts.game_structure.game_essentials import game
@@ -42,6 +43,7 @@ from ..ui.generate_box import get_box, BoxStyles
 from ..ui.generate_button import ButtonStyles, get_button_dict
 from ..ui.get_arrow import get_arrow
 from ..ui.icon import Icon
+from scripts.cat.skills import SkillPath
 
 
 # ---------------------------------------------------------------------------- #
@@ -172,6 +174,8 @@ class ProfileScreen(Screens):
         self.placeholder_tab_4 = None
         self.placeholder_tab_3 = None
         self.placeholder_tab_2 = None
+        self.faith_bar = None
+        self.your_tab = None
         self.backstory_tab_button = None
         self.dangerous_tab_button = None
         self.personal_tab_button = None
@@ -181,11 +185,37 @@ class ProfileScreen(Screens):
         self.previous_cat_button = None
         self.next_cat_button = None
         self.the_cat = None
+        self.prevent_fading_text = None
         self.checkboxes = {}
         self.profile_elements = {}
+        self.join_df_button = None
+        self.exit_df_button = None
+        self.accessories_tab_button = None
+        self.exile_return_button = None
+        self.page = 0
+        self.max_pages = 1
+        self.clear_accessories = None
+        self.search_bar_image = None
+        self.search_bar = None
+        self.previous_page_button = None
+        self.next_page_button = None
+        self.accessory_tab_button = None
+        self.previous_search_text = "search"
+        self.cat_list_buttons = None
+        self.search_inventory = []
+        self.faith_text = None
 
     def handle_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_START_PRESS:
+            
+            if game.switches["window_open"]:
+                pass
+            elif event.ui_element == self.exile_return_button:
+                game.clan.exile_return = True
+                Cat.return_home(self)
+                self.change_screen('events screen')
+                # self.exit_screen()
+                # game.switches['cur_screen'] = "events screen"
             if event.ui_element == self.back_button:
                 self.close_current_tab()
                 self.change_screen(game.last_screen_forProfile)
@@ -194,6 +224,29 @@ class ProfileScreen(Screens):
                     self.clear_profile()
                     game.switches["cat"] = self.previous_cat
                     self.build_profile()
+                    self.page = 0
+                    if self.previous_page_button:
+
+                        inventory_len = 0
+                        if self.search_bar.get_text() in ["", "search"]:
+                            inventory_len = len(self.the_cat.pelt.inventory)
+                        else:
+                            for ac in self.the_cat.pelt.inventory:
+                                if self.search_bar.get_text().lower() in ac.lower():
+                                    inventory_len+=1
+                        self.max_pages = math.ceil(inventory_len/18)
+                        if self.page == 0 and self.max_pages == 1:
+                            self.previous_page_button.disable()
+                            self.next_page_button.disable()
+                        elif self.page == 0:
+                            self.previous_page_button.disable()
+                            self.next_page_button.enable()
+                        elif self.page == self.max_pages - 1:
+                            self.previous_page_button.enable()
+                            self.next_page_button.disable()
+                        else:
+                            self.previous_page_button.enable()
+                            self.next_page_button.enable()
                     self.update_disabled_buttons_and_text()
                 else:
                     print("invalid previous cat", self.previous_cat)
@@ -202,6 +255,30 @@ class ProfileScreen(Screens):
                     self.clear_profile()
                     game.switches["cat"] = self.next_cat
                     self.build_profile()
+                    self.page = 0
+                    if self.previous_page_button:
+                        self.previous_page_button.enable()
+                        self.next_page_button.enable()
+                        inventory_len = 0
+                        if self.search_bar.get_text() in ["", "search"]:
+                            inventory_len = len(self.the_cat.pelt.inventory)
+                        else:
+                            for ac in self.the_cat.pelt.inventory:
+                                if self.search_bar.get_text().lower() in ac.lower():
+                                    inventory_len+=1
+                        self.max_pages = math.ceil(inventory_len/18)
+                        if self.page == 0 and (self.max_pages == 1 or self.max_pages == 0):
+                            self.previous_page_button.disable()
+                            self.next_page_button.disable()
+                        elif self.page == 0:
+                            self.previous_page_button.disable()
+                            self.next_page_button.enable()
+                        elif self.page == self.max_pages - 1:
+                            self.previous_page_button.enable()
+                            self.next_page_button.disable()
+                        else:
+                            self.previous_page_button.enable()
+                            self.next_page_button.enable()
                     self.update_disabled_buttons_and_text()
                 else:
                     print("invalid next cat", self.previous_cat)
@@ -210,10 +287,15 @@ class ProfileScreen(Screens):
                 self.change_screen("sprite inspect screen")
             elif event.ui_element == self.relations_tab_button:
                 self.toggle_relations_tab()
+            elif self.the_cat.ID == game.clan.your_cat.ID and event.ui_element == self.profile_elements["change_cat"]:
+                self.close_current_tab()
+                self.change_screen("choose reborn screen")
             elif event.ui_element == self.roles_tab_button:
                 self.toggle_roles_tab()
             elif event.ui_element == self.personal_tab_button:
                 self.toggle_personal_tab()
+             elif event.ui_element == self.your_tab:
+                self.toggle_your_tab()
             elif event.ui_element == self.dangerous_tab_button:
                 self.toggle_dangerous_tab()
             elif event.ui_element == self.backstory_tab_button:
@@ -226,6 +308,10 @@ class ProfileScreen(Screens):
                 self.toggle_history_tab()
             elif event.ui_element == self.conditions_tab_button:
                 self.toggle_conditions_tab()
+            elif event.ui_element == self.accessories_tab_button:
+                self.toggle_accessories_tab()
+            elif event.ui_element == self.placeholder_tab_3:
+                self.toggle_faith_tab()
             elif (
                 "leader_ceremony" in self.profile_elements
                 and event.ui_element == self.profile_elements["leader_ceremony"]
