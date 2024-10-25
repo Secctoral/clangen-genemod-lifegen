@@ -28,6 +28,7 @@ class Game:
     just_died = []  # keeps track of which cats died this moon via die()
 
     cur_events_list = []
+    next_events_list = []
     ceremony_events_list = []
     other_events_list = []
     your_events_list = []
