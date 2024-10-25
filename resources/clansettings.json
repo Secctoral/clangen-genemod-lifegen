@@ -79,6 +79,11 @@
             "Displays Clan age and current Clan season on several pages.",
             false
         ]
+        "all accessories": [
+            "Enable all accessories",
+            "All cats will have all accessories available in their inventory",
+            false
+        ]
     },
     "role": {
       "deputy": [
