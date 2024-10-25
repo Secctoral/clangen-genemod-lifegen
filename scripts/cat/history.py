@@ -276,7 +276,7 @@ class History:
             SkillPath.DREAM: ["understanding dreams"],
             SkillPath.CLAIRVOYANT: ["predicting the future"],
             SkillPath.PROPHET: ["understanding prophecies"],
-            SkillPath.GHOST: ["connecting to the afterlife"]
+            SkillPath.GHOST: ["connecting to the afterlife"],
             SkillPath.EXPLORER: ["exploring unknown areas"],
             SkillPath.TRACKER: ["tracking down scents"],
             SkillPath.ARTISTAN: ["decorating dens"],
