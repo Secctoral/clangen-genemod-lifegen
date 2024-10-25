@@ -21,6 +21,16 @@
         "Camp backgrounds will match with the mode: nighttime for dark mode and daytime for light mode.",
         false
       ],
+      "new accessories": [
+            "New Accessories",
+            "Enable new accessories",
+            true
+      ],
+      "red_bg": [
+            "Red background",
+            "Enable background color to get more red as you murder more cats",
+            true
+      ],
       "fullscreen scaling": [
           "Ignore fullscreen scaling rules",
           "If enabled, fullscreen will display as large as possible (toggle fullscreen to update). This may include visual artifacts.",
