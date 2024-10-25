@@ -731,4 +731,31 @@
   },
   "lock_season": false,
   "comment": "Forces the season to be locked at the Clan's starting_season"
+  "affair_success_chance": 1,
+	"affair_success_pregnancy_chance": 20,
+	"affair_relationship_change_lb": 10,
+	"affair_relationship_change_ub": 30,
+	"murder_chance":-1,
+	"accomplice_chance":-1,
+	"debug_ensure_dialogue": "",
+
+	"shunned_cat": {
+		"exile_chance": {
+			"newborn": 500,
+			"kitten": 45,
+			"adolescent": 20,
+			"young adult": 10,
+			"adult": 9,
+			"senior adult": 8,
+			"senior": 8	
+			},
+		"max_shunned_moons": 10,
+		"return_home_chance": 0,
+		"max_forgiven_moons": 10,
+		"comment": [
+		"Newborns have an exile_chance in case one of you sick freaks (/lhj) decides to save edit them to be shunned.",
+		"Leaving return_home_chance at zero will keep the game's default chances.",
+		"max_forgiven_moons is how many moons after being forgiven the cat get 'forgiven'-tagged dialogue and events."
+	]
+	}
 }
