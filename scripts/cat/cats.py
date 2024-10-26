@@ -631,6 +631,7 @@ class Cat:
                 "apprentice",
                 "mediator apprentice",
                 "medicine cat apprentice",
+                "queen's apprentice"
             ]:
                 self.age = "adolescent"
             else:
@@ -1535,6 +1536,12 @@ class Cat:
 
         elif self.status == 'medicine cat apprentice':
             pass
+            
+        elif self.status == 'mediator apprentice':
+            pass
+        
+        elif self.status == "queen's apprentice":
+            pass
 
         elif self.status == "warrior":
             if old_status == "leader":
@@ -1570,6 +1577,12 @@ class Cat:
 
         elif self.status == "mediator apprentice":
             pass
+            
+        elif self.status == 'queen':
+            pass
+
+        elif self.status == "queen's apprentice":
+            pass
 
         # update class dictionary
         self.all_cats[self.ID] = self
@@ -1581,7 +1594,7 @@ class Cat:
     def rank_change_traits_skill(self, mentor):
         """Updates trait and skill upon ceremony"""
 
-        if self.status in ["warrior", "medicine cat", "mediator"]:
+        if self.status in ["warrior", "medicine cat", "mediator", "queen"]:
             # Give a couple doses of mentor influence:
             if mentor:
                 max_influence = randint(0, 2)
@@ -2141,7 +2154,7 @@ class Cat:
         self.personality.set_kit(self.is_baby())
         # Upon age-change
 
-        if self.status in ['apprentice', 'mediator apprentice', 'medicine cat apprentice']:
+        if self.status in ['apprentice', 'mediator apprentice', 'medicine cat apprentice', "queen's apprentice"]:
             self.update_mentor()
 
     def thoughts(self):
@@ -2783,7 +2796,7 @@ class Cat:
         
         #There are some special tasks we need to do for apprentice
         # Note that although you can unretire cats, they will be a full warrior/med_cat/mediator
-        if self.moons > 6 and self.status in ["apprentice", "medicine cat apprentice", "mediator apprentice"]:
+        if self.moons > 6 and self.status in ["apprentice", "medicine cat apprentice", "mediator apprentice", "queen's apprentice"]:
             _ment = Cat.fetch_cat(self.mentor) if self.mentor else None
             self.status_change(
                 "warrior"
@@ -2938,6 +2951,14 @@ class Cat:
             and potential_mentor.status != "mediator"
         ):
             return False
+        if self.status == "queen's apprentice" and potential_mentor.status != 'queen':
+            return False
+        
+        if potential_mentor.moons <= 0:
+            return False
+        
+        if game.clan and game.clan.your_cat and game.clan.age == 0 and potential_mentor.ID == game.clan.your_cat.ID:
+            return False
 
         # If not an app, don't need a mentor
         if "apprentice" not in self.status:
@@ -2985,7 +3006,7 @@ class Cat:
             or self.outside
             or self.exiled
             or self.status
-            not in ["apprentice", "mediator apprentice", "medicine cat apprentice"]
+            not in ["apprentice", "mediator apprentice", "medicine cat apprentice", "queen's apprentice"]
         )
         if illegible_for_mentor:
             self.__remove_mentor()
