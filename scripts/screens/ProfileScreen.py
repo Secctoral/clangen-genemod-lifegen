@@ -294,7 +294,7 @@ class ProfileScreen(Screens):
                 self.toggle_roles_tab()
             elif event.ui_element == self.personal_tab_button:
                 self.toggle_personal_tab()
-             elif event.ui_element == self.your_tab:
+            elif event.ui_element == self.your_tab:
                 self.toggle_your_tab()
             elif event.ui_element == self.dangerous_tab_button:
                 self.toggle_dangerous_tab()
