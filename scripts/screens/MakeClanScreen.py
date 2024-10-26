@@ -185,10 +185,10 @@ class MakeClanScreen(Screens):
         # Buttons that appear on every screen.
         self.menu_warning = pygame_gui.elements.UITextBox(
             '',
-            scale(pygame.Rect((25, 25), (600, -1))),
+            ui_scale(pygame.Rect((25, 25), (600, -1))),
             object_id=get_text_box_theme("#text_box_22_horizleft"), manager=MANAGER
         )
-        self.main_menu = UIImageButton(scale(pygame.Rect((50, 50), (153, 30))), "", object_id="#main_menu_button"
+        self.main_menu = UIImageButton(ui_scale(pygame.Rect((50, 50), (153, 30))), "", object_id="#main_menu_button"
                                        , manager=MANAGER)
         create_example_cats()
 
