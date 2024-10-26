@@ -307,10 +307,18 @@
   },
   "roles": {
     "mediator_app_chance": 50,
-    "base_medicine_app_chance": 41,
-    "become_mediator_chances": {
-      "warrior": 5000,
-      "elder": 400
+		"base_medicine_app_chance": 41,
+		"become_mediator_chances": {
+			"warrior": 5000,
+			"elder": 400
+		},
+		"become_med_chances": {
+			"warrior": 5000,
+			"elder": 400
+		},
+		"become_queen_chances": {
+			"warrior": 5000,
+			"elder": 400
     }
   },
   "lost_cat": {
@@ -566,20 +574,15 @@
     ]
   },
   "graduation": {
-    "base_app_timeskip_ex": [
-      [3, 12],
-      [5, 6]
-    ],
-    "base_med_app_timeskip_ex": [
-      [2, 7],
-      [2, 3]
-    ],
-    "max_apprentice_age": {
-      "medicine cat apprentice": 30,
-      "apprentice": 25,
-      "mediator apprentice": 25
-    },
-    "min_graduating_age": 10
+    "base_app_timeskip_ex": [[3, 12],[5, 6]],
+		"base_med_app_timeskip_ex": [[2, 7],[2, 3]],
+		"max_apprentice_age": {
+			"medicine cat apprentice": 30,
+			"apprentice": 25,
+			"mediator apprentice": 25,
+			"queen's apprentice": 25
+		},
+		"min_graduating_age": 10
   },
   "outside_ex": {
     "base_adolescent_timeskip_ex": [
@@ -730,14 +733,14 @@
     }
   },
   "lock_season": false,
-  "comment": "Forces the season to be locked at the Clan's starting_season"
+  "comment": "Forces the season to be locked at the Clan's starting_season",
   "affair_success_chance": 1,
-	"affair_success_pregnancy_chance": 20,
-	"affair_relationship_change_lb": 10,
-	"affair_relationship_change_ub": 30,
-	"murder_chance":-1,
-	"accomplice_chance":-1,
-	"debug_ensure_dialogue": "",
+  "affair_success_pregnancy_chance": 20,
+  "affair_relationship_change_lb": 10,
+  "affair_relationship_change_ub": 30,
+  "murder_chance":-1,
+  "accomplice_chance":-1,
+  "debug_ensure_dialogue": "",
 
 	"shunned_cat": {
 		"exile_chance": {
