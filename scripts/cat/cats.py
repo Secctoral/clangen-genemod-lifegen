@@ -1353,7 +1353,7 @@ class Cat:
                 # grief the cat
                 if game.clan.game_mode != "classic":
                     cat.get_ill(
-                        "grief stricken", event_triggered=True, severity="major", grief_cat=self
+                        "grief stricken", event_triggered=True, severity="major",
                     )
 
             # If major grief fails, but there are still very_high or high values,
@@ -2476,7 +2476,7 @@ class Cat:
     #                                  conditions                                  #
     # ---------------------------------------------------------------------------- #
 
-    def get_ill(self, name, event_triggered=False, lethal=True, severity="default", grief_cat=None):
+    def get_ill(self, name, event_triggered=False, lethal=True, severity="default",):
         """Add an illness to this cat.
 
         :param name: name of the illness (str)
@@ -2532,7 +2532,6 @@ class Cat:
             medicine_mortality=med_mortality,
             risks=illness["risks"],
             event_triggered=event_triggered,
-            grief_cat = grief_cat
         )
 
         if new_illness.name not in self.illnesses:
@@ -2545,8 +2544,6 @@ class Cat:
                 "risks": new_illness.risks,
                 "event_triggered": new_illness.new,
             }
-            if grief_cat:
-                self.illnesses[new_illness.name]['grief_cat'] = grief_cat.ID
 
     def get_injured(self, name, event_triggered=False, lethal=True, severity="default"):
         """Add an injury to this cat.
