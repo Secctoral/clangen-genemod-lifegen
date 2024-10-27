@@ -43,6 +43,7 @@ from scripts.utility import (
     get_personality_compatibility,
     event_text_adjust,
     update_sprite,
+    get_cluster,
     leader_ceremony_text_adjust,
 )
 
