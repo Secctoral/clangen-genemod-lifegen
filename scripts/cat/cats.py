@@ -187,7 +187,7 @@ class Cat:
             self.gender = 'fem'
         elif self.gender == 'male':
             self.gender = 'masc'
-        self.status = status.replace("medicine cat", "medicine cat")
+        self.status = status
         self.backstory = backstory
         self.age = None
         self.skills = CatSkills(skill_dict=skill_dict)
