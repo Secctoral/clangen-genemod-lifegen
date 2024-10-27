@@ -33,5 +33,10 @@ class Icon(StrEnum):
     MAGNIFY = "\U0001F50D"
     NOTEPAD = "\U0001F5C9"
     
+    # LIFEGEN ICONS
+    
     HOUSE = "\U2302"
     TALK = "\U1F4AC"
+    INSULT = "\U1F5EF"
+    FLIRT = "\U2665"
+    NOFLIRT = "\U2026"
