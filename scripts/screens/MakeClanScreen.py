@@ -47,6 +47,9 @@ class MakeClanScreen(Screens):
         "leader": pygame.image.load(
             "resources/images/pick_clan_screen/choose cat.png"
         ).convert_alpha(),
+        "leaderdark": pygame.image.load(
+            "resources/images/pick_clan_screen/choose cat dark.png"
+        ).convert_alpha(),
         "deputy": pygame.image.load(
             "resources/images/pick_clan_screen/deputy_light.png"
         ).convert_alpha(),
@@ -152,7 +155,11 @@ class MakeClanScreen(Screens):
         )
         self.leader_img = pygame.transform.scale(
             self.ui_images["leader"],
-            ui_scale_dimensions((800, 700)),
+            ui_scale_dimensions((300, 71)),
+        )
+        self.leaderdark_img = pygame.transform.scale(
+            self.ui_images["leaderdark"],
+            ui_scale_dimensions((300, 71)),
         )
         self.deputy_img = pygame.transform.scale(
             self.ui_images["deputy"],
@@ -1726,7 +1733,7 @@ class MakeClanScreen(Screens):
         self.sub_screen = "choose leader"
 
         self.elements["background"] = pygame_gui.elements.UIImage(
-            ui_scale(pygame.Rect((0, 414), (800, 286))),
+            ui_scale(pygame.Rect((250, 500), (300, 71))),
             self.leader_img,
             manager=MANAGER,
         )
@@ -2314,7 +2321,7 @@ class MakeClanScreen(Screens):
             sound_id="save",
         )
         self.elements["save_confirm"] = pygame_gui.elements.UITextBox(
-            "Welcome to the world, ' + self.your_cat.name.prefix + 'kit!",
+            'Welcome to the world, ' + self.your_cat.name.prefix + 'kit!',
             ui_scale(pygame.Rect((100, 70), (600, 30))),
             object_id=get_text_box_theme("#text_box_30_horizcenter"),
             manager=MANAGER,
