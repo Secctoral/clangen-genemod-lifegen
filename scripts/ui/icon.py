@@ -35,9 +35,9 @@ class Icon(StrEnum):
     
     # LIFEGEN ICONS
     
-    HOUSE = "\U2302"
-    TALK = "\U1F4AC"
-    INSULT = "\U1F5EF"
-    FLIRT = "\U2665"
-    NOFLIRT = "\U2026"
-    HALFMOON = "\U25D1"
+    HOUSE = "\U00002302"
+    TALK = "\U0001F4AC"
+    INSULT = "\U0001F5EF"
+    FLIRT = "\U00002665"
+    NOFLIRT = "\U00002026"
+    HALFMOON = "\U000025D1"
