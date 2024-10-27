@@ -40,3 +40,4 @@ class Icon(StrEnum):
     INSULT = "\U1F5EF"
     FLIRT = "\U2665"
     NOFLIRT = "\U2026"
+    HALFMOON = "\U25D1"
