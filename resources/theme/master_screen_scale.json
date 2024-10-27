@@ -2364,6 +2364,57 @@
       }
     }
   },
+  "#follow_df_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/follow_df.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/follow_df_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/follow_df_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/follow_df_unavailable.png"
+            }
+        }
+    },
+    "#follow_sc_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/follow_sc.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/follow_sc_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/follow_sc_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/follow_sc_unavailable.png"
+            }
+        }
+    },
+    "#send_ur_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/send_ur.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/send_ur_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/send_ur_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/send_ur_unavailable.png"
+            }
+        }
+    },
   "#sub_tab_1_button": {
     "images": {
       "normal_image": {
