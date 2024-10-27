@@ -1327,6 +1327,91 @@
       }
     }
   },
+  "#half_moon_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/halfmoon_meeting.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_unavaliable.png"
+            }
+        }
+    },
+    "#talk_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/talk.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/talk_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/talk_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/talk_unavailable.png"
+            }
+        }
+    },
+    "#flirt_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/flirt.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/flirt_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/flirt_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/flirt_unavailable.png"
+            }
+        }
+    },
+    "#date_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/date.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/date_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/date_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/date_unavailable.png"
+            }
+        }
+    },
+    "#insult_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/insult.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/insult_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/insult_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/insult_unavailable.png"
+            }
+        }
+    },
   "#guide_sc_button": {
     "images": {
       "normal_image": {
@@ -1974,23 +2059,41 @@
       }
     }
   },
-  "#exile_cat_button": {
-    "images": {
-      "normal_image": {
-        "path": "resources/images/buttons/exile_cat.png"
-      },
-      "hovered_image": {
-        "path": "resources/images/buttons/exile_cat_hover.png"
-      },
-      "selected_image": {
-        "path": "resources/images/buttons/exile_cat_hover.png"
-      },
-      "disabled_image": {
-        "path": "resources/images/buttons/exile_cat_unavailable.png"
-      }
-    }
-  },
-  "#destroy_accessory_button": {
+  "#murder_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/murder.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/murder_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/murder_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/murder_unavailable.png"
+            }
+        }
+    },
+    "#exile_cat_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/exile_cat.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/exile_cat_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/exile_cat_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/exile_cat_unavailable.png"
+            }
+        }
+    },
+    "#destroy_accessory_button": {
         "prototype": "#image_button",
         "images": {
             "normal_image": {
