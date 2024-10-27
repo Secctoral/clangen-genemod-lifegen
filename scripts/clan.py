@@ -58,7 +58,10 @@ class Clan:
         "leader",
         "elder",
         "mediator",
+        "queen",
         "general",
+        "exiled",
+        "former Clancat"
     ]
 
     leader_lives = 0
