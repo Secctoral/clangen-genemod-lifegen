@@ -822,6 +822,26 @@ class ProfileScreen(Screens):
         if self.open_tab == "history" and self.open_sub_tab == "user notes":
             self.load_user_notes()
 
+        if not game.clan.your_cat:
+            print("Are you playing a normal ClanGen save? Switch to a LifeGen save or create a new cat!")
+            print("Choosing random cat to play...")
+            game.clan.your_cat = Cat.all_cats[choice(game.clan.clan_cats)]
+            counter = 0
+            while game.clan.your_cat.dead or game.clan.your_cat.outside:
+                if counter == 25:
+                    break
+                game.clan.your_cat = Cat.all_cats[choice(game.clan.clan_cats)]
+                counter+=1
+
+            print("Chose " + str(game.clan.your_cat.name))
+
+        if self.the_cat.ID == game.clan.your_cat.ID:
+            self.profile_elements["change_cat"] = UIImageButton(ui_scale(pygame.Rect((700, 60),(34,34))), "\u2684",
+            get_button_dict(ButtonStyles.ICON, (34, 34)),
+            object_id="@buttonstyles_icon",
+            manager=MANAGER,
+            sound_id="dice_roll",)
+
         if self.the_cat.status == "leader" and not self.the_cat.dead:
             self.profile_elements["leader_ceremony"] = UIImageButton(
                 ui_scale(pygame.Rect((383, 110), (34, 34))),
