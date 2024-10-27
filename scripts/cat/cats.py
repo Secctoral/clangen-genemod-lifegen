@@ -3370,7 +3370,7 @@ class Cat:
         blanks = []
         for ID in self.all_cats:
             the_cat = self.all_cats.get(ID)
-            if the_cat.ID is not self.ID:
+            if the_cat.ID is not self.ID and the_cat.moons > -1:
                 mates = the_cat.ID in self.mate
                 are_parents = False
                 parents = False
@@ -4095,15 +4095,15 @@ class Cat:
 
         updated_age = False
         for key_age in self.age_moons.keys():            
-            if key_age == "senior" and value > self.age_moons[key_age][1] + 1:
-                self.age = "senior"
             if self._moons in range(
                 self.age_moons[key_age][0], self.age_moons[key_age][1] + 1
             ):
                 updated_age = True
                 self.age = key_age
         try:
-            if not updated_age and self.age is not None:
+            if self.moons == -1:
+                self.age = "newborn"
+            elif not updated_age and self.age is not None:
                 self.age = "senior"
         except AttributeError:
             print("ERROR: cat has no age attribute! Cat ID: " + self.ID)
