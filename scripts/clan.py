@@ -836,6 +836,10 @@ class Clan:
             "version_name": SAVE_VERSION_NUMBER,
             "version_commit": get_version_info().version_number,
             "source_build": get_version_info().is_source_build,
+            "your_cat": self.your_cat.ID,
+            "murdered": self.murdered,
+            "exile_return": self.exile_return,
+            "affair": self.affair,
             "custom_pronouns": self.custom_pronouns,
             "clan_age": self.clan_age
         }
