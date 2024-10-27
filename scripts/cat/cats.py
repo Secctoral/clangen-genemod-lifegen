@@ -1350,7 +1350,11 @@ class Cat:
                 text += " " + choice(MINOR_MAJOR_REACTION["major"])
                 text = event_text_adjust(Cat, text=text, main_cat=self, random_cat=cat)
 
-                cat.get_ill("grief stricken", event_triggered=True, severity="major")
+                # grief the cat
+                if game.clan.game_mode != "classic":
+                    cat.get_ill(
+                        "grief stricken", event_triggered=True, severity="major", grief_cat=self
+                    )
 
             # If major grief fails, but there are still very_high or high values,
             # it can fail to to minor grief. If they have a family relation, bypass the roll.
@@ -2472,7 +2476,7 @@ class Cat:
     #                                  conditions                                  #
     # ---------------------------------------------------------------------------- #
 
-    def get_ill(self, name, event_triggered=False, lethal=True, severity="default"):
+    def get_ill(self, name, event_triggered=False, lethal=True, severity="default", grief_cat=None):
         """Add an illness to this cat.
 
         :param name: name of the illness (str)
