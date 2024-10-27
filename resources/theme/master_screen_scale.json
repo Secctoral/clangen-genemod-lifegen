@@ -734,6 +734,40 @@
       }
     }
   },
+  "#queen_activity_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/queen_activity.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/queen_activity_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/queen_activity_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/queen_activity_unavailable.png"
+            }
+        }
+    },
+    "#df_toggle": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/df_toggle2.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/df_toggle_hover2.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/df_toggle_hover2.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/df_toggle_unavailable2.png"
+            }
+        }
+    },
   "#toggle_fullscreen_button": {
     "images": {
       "normal_image": {
@@ -1226,6 +1260,57 @@
       }
     }
   },
+  "#half_moon_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/halfmoon_meeting.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/halfmoon_meeting_unavaliable.png"
+            }
+        }
+    },
+    "#gift_clanmate_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/gift_accessory.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/gift_accessory_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/gift_accessory_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/gift_accessory_unavaliable.png"
+            }
+        }
+    },
+    "#your_faith_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/your_faith.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/your_faith_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/your_faith_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/your_faith_unavailable.png"
+            }
+        }
+    },
   "#leader_ceremony_button": {
     "images": {
       "normal_image": {
@@ -1905,6 +1990,23 @@
       }
     }
   },
+  "#destroy_accessory_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/destroy_accessory.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/destroy_accessory_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/destroy_accessory_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/destroy_accessory_unavailable.png"
+            }
+        }
+    },
   "#exile_df_button": {
     "images": {
       "normal_image": {
