@@ -32,3 +32,4 @@ class Icon(StrEnum):
 
     MAGNIFY = "\U0001F50D"
     NOTEPAD = "\U0001F5C9"
+    HOUSE = "\U2302"
