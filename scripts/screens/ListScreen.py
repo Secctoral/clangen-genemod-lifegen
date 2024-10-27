@@ -265,6 +265,13 @@ class ListScreen(Screens):
             elif event.key == pygame.K_RIGHT:
                 self.change_screen("patrol screen")
 
+    def get_living_cats(self):
+        self.living_cats = []
+        for the_cat in Cat.all_cats_list:
+            if not the_cat.dead and not the_cat.outside and not the_cat.moons == -1:
+                self.living_cats.append(the_cat)
+
+
     def screen_switches(self):
         super().screen_switches()
         self.show_mute_buttons()
@@ -616,6 +623,7 @@ class ListScreen(Screens):
                         self.cat_list_bar_elements["search_bar_entry"].get_text()
                     )
 
+
     def update_cat_list(self, search_text=""):
         """
         updates the cat list and display, search text is taken into account
@@ -628,9 +636,11 @@ class ListScreen(Screens):
 
         # adding in the guide if necessary, this ensures the guide isn't affected by sorting as we always want them to
         # be the first cat on the list
-        if (self.current_group == "df" and game.clan.instructor.df) or (
-            self.current_group == "sc" and not game.clan.instructor.df
-        ):
+       if self.current_group == "df":
+            if game.clan.demon in self.full_cat_list:
+                self.full_cat_list.remove(game.clan.demon)
+            self.full_cat_list.insert(0, game.clan.demon)
+        elif self.current_group == "sc":
             if game.clan.instructor in self.full_cat_list:
                 self.full_cat_list.remove(game.clan.instructor)
             self.full_cat_list.insert(0, game.clan.instructor)
@@ -771,7 +781,7 @@ class ListScreen(Screens):
         self.current_group = "clan"
         self.death_status = "living"
         self.full_cat_list = [
-            cat for cat in Cat.all_cats_list if not cat.dead and not cat.outside
+            cat for cat in Cat.all_cats_list if not cat.dead and not cat.outside and cat.moons >= 0
         ]
 
     def get_cotc_cats(self):
@@ -796,6 +806,7 @@ class ListScreen(Screens):
             if (
                 the_cat.dead
                 and the_cat.ID != game.clan.instructor.ID
+                and the_cat.ID != game.clan.demon.ID
                 and not the_cat.outside
                 and not the_cat.df
                 and not the_cat.faded
@@ -813,6 +824,7 @@ class ListScreen(Screens):
         for the_cat in Cat.all_cats_list:
             if (
                 the_cat.dead
+                and the_cat.ID != game.clan.demon.ID
                 and the_cat.ID != game.clan.instructor.ID
                 and the_cat.df
                 and not the_cat.faded
