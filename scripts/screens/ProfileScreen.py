@@ -836,7 +836,7 @@ class ProfileScreen(Screens):
             print("Chose " + str(game.clan.your_cat.name))
 
         if self.the_cat.ID == game.clan.your_cat.ID:
-            self.profile_elements["change_cat"] = UIImageButton(ui_scale(pygame.Rect((700, 60),(34,34))), "\u2684",
+            self.profile_elements["change_cat"] = UISurfaceImageButton(ui_scale(pygame.Rect((700, 60),(34,34))), "\u2684",
             get_button_dict(ButtonStyles.ICON, (34, 34)),
             object_id="@buttonstyles_icon",
             manager=MANAGER,
