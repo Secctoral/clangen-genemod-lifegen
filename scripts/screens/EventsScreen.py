@@ -11,9 +11,11 @@ from scripts.game_structure.game_essentials import game
 from scripts.game_structure.screen_settings import MANAGER
 from scripts.game_structure.ui_elements import (
     UIModifiedScrollingContainer,
+    UIImageButton,
     IDImageButton,
     UISurfaceImageButton,
     CatButton,
+    UISpriteButton,
 )
 from scripts.game_structure.windows import GameOver
 from scripts.screens.Screens import Screens
@@ -149,7 +151,7 @@ class EventsScreen(Screens):
             event.type == pygame_gui.UI_BUTTON_PRESSED
         ):  # everything else on button press to prevent blinking
             element = event.ui_element
-           if element == self.timeskip_button:
+            if element == self.timeskip_button:
                 if game.clan.your_cat.dead_for >= 1 and not game.switches['continue_after_death']:
                     DeathScreen('events screen')
                 elif (game.clan.your_cat.moons == 5
@@ -845,7 +847,7 @@ class EventsScreen(Screens):
         self.misc_events = [x for x in game.cur_events_list if "misc" in x.types]
         
         self.event_display_type = self.current_display
-         if self.event_display_type == "all":
+        if self.event_display_type == "all":
             self.display_events = self.all_events
         elif self.event_display_type == "ceremony":
             self.display_events = self.ceremony_events
@@ -1004,10 +1006,24 @@ class EventsScreen(Screens):
         )
 
         # set saved scroll position
+        
         if game.switches["saved_scroll_positions"].get(self.current_display):
             self.event_display.vert_scroll_bar.set_scroll_from_start_percentage(
                 game.switches["saved_scroll_positions"][self.current_display]
             )
+            
+        if self.you:
+            self.you.kill()
+        if game.clan.your_cat.moons != -1:
+            self.you = UISpriteButton(ui_scale(pygame.Rect((1050, 200), (200, 200))),
+                                game.clan.your_cat.sprite,
+                                cat_object=game.clan.your_cat,
+                                manager=MANAGER)
+        if game.switches['continue_after_death'] and game.clan.your_cat.moons >= 0:
+            self.death_button.show()
+        else:
+            self.death_button.hide()
+            
 
     def update_list_buttons(self):
         """
