@@ -1296,12 +1296,8 @@ class Pregnancy_Events:
         # First, gather all the mates of the provided bio parents to be added
         # as adoptive parents.
         all_adoptive_parents = []
-        
-        all_pars = [cat]
-        if other_cat:
-            all_pars += other_cat
-        birth_parents = [i.ID for i in all_pars if i]
-        for _par in all_pars:
+        birth_parents = [i.ID for i in (cat, other_cat) if i]
+        for _par in (cat, other_cat):
             if not _par:
                 continue
             for _m in _par.mate:
