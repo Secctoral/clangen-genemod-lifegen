@@ -1646,6 +1646,66 @@ class MakeClanScreen(Screens):
             object_id="@buttonstyles_squoval",
             manager=MANAGER,
         )
+        self.elements["clan_size"] = pygame_gui.elements.UITextBox(
+            "Clan Size: ",
+            ui_scale(pygame.Rect((200, 55), (100, 30))),
+            object_id="#text_box_30_horizcenter",
+            manager=MANAGER
+        )
+        self.elements["clan_age"] = pygame_gui.elements.UITextBox(
+            "Clan Age: ",
+            ui_scale(pygame.Rect((200, 98), (100, 30))),
+            object_id="#text_box_30_horizcenter",
+            manager=MANAGER
+        )
+        self.elements["small"] = UISurfaceImageButton(
+            ui_scale(pygame.Rect((300, 50), (96, 30))),
+            "Small",
+            get_button_dict(ButtonStyles.SQUOVAL, (96, 30)),
+            object_id="@buttonstyles_squoval",
+            starting_height=2,
+            manager=MANAGER,
+        )
+
+        self.elements["medium"] = UISurfaceImageButton(
+            ui_scale(pygame.Rect((425, 50), (96, 30))),
+            "Medium",
+            get_button_dict(ButtonStyles.SQUOVAL, (96, 30)),
+            object_id="@buttonstyles_squoval",
+            starting_height=2,
+            manager=MANAGER,
+        )
+        
+        self.elements["large"] = UISurfaceImageButton(
+            ui_scale(pygame.Rect((550, 50), (96, 30))),
+            "Large",
+            get_button_dict(ButtonStyles.SQUOVAL, (96, 30)),
+            object_id="@buttonstyles_squoval",
+            starting_height=2,
+            manager=MANAGER,
+        )
+
+        self.elements["medium"].disable()
+
+        self.elements["established"] = UISurfaceImageButton(
+            ui_scale(pygame.Rect((300, 100), (96, 30))),
+            "Old",
+            get_button_dict(ButtonStyles.SQUOVAL, (96, 30)),
+            object_id="@buttonstyles_squoval",
+            starting_height=2,
+            tool_tip_text="The Clan has existed for many moons and cats' backstories will reflect this.",
+            manager=MANAGER,
+        )
+        self.elements["new"] = UISurfaceImageButton(
+            ui_scale(pygame.Rect((425, 100), (96, 30))),
+            "New",
+            get_button_dict(ButtonStyles.SQUOVAL, (96, 30)),
+            object_id="@buttonstyles_squoval",
+            starting_height=2,
+            tool_tip_text="The Clan is newly established and cats' backstories will reflect this.",
+            manager=MANAGER,
+        )
+        self.elements["established"].disable()
 
     def clan_name_header(self):
         self.elements["name_backdrop"] = pygame_gui.elements.UIImage(
