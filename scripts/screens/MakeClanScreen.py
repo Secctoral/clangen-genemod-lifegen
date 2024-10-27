@@ -45,7 +45,7 @@ class MakeClanScreen(Screens):
             "resources/images/pick_clan_screen/name_clan_light.png"
         ).convert_alpha(),
         "leader": pygame.image.load(
-            "resources/images/pick_clan_screen/leader_light.png"
+            "resources/images/pick_clan_screen/choose cat.png"
         ).convert_alpha(),
         "deputy": pygame.image.load(
             "resources/images/pick_clan_screen/deputy_light.png"
