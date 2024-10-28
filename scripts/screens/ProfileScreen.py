@@ -1224,10 +1224,15 @@ class ProfileScreen(Screens):
                 self.accessory_tab_button.disable()
             else:
                 self.accessory_tab_button.enable()
-        self.profile_elements["favourite_button"].rebuild()
         del favorite_button_rect
 
 
+         # Determine where the next and previous cat buttons lead
+        (
+            self.next_cat,
+            self.previous_cat,
+        ) = self.the_cat.determine_next_and_previous_cats()
+        
         # Disable and enable next and previous cat buttons as needed.
         if self.next_cat == 0:
             self.next_cat_button.disable()
@@ -1422,7 +1427,7 @@ class ProfileScreen(Screens):
             self.placeholder_tab_3.kill()
             self.profile_elements['your_tab'] = UISurfaceImageButton(
                 ui_scale(pygame.Rect((400, 622), (176, 30))),
-                "Faith",
+                "Your Tab",
                 get_button_dict(ButtonStyles.PROFILE_MIDDLE, (176, 30)),
                 object_id="@buttonstyles_profile_middle",
                 starting_height=1,
@@ -1436,8 +1441,13 @@ class ProfileScreen(Screens):
                 self.close_current_tab()
             self.placeholder_tab_3.kill()
             self.placeholder_tab_3 = None
-            self.placeholder_tab_3 = UIImageButton(ui_scale(pygame.Rect((800, 1244), (352, 60))), "",
-                                            object_id="#faith_tab_button", starting_height=1, manager=MANAGER)
+            self.placeholder_tab_3 = UIImageButton(
+                ui_scale(pygame.Rect((400, 622), (176, 30))),
+                "Faith",
+                get_button_dict(ButtonStyles.PROFILE_MIDDLE, (176, 30)),
+                object_id="@buttonstyles_profile_middle",
+                starting_height=1,
+                manager=MANAGER,)
             if self.the_cat.dead or self.the_cat.outside or self.the_cat.moons < 6:
                 self.placeholder_tab_3.disable()
             else:
@@ -3246,8 +3256,8 @@ class ProfileScreen(Screens):
                 self.have_kits_button = UISurfaceImageButton(
                     ui_scale(pygame.Rect((402, 586), (172, 36))),
                     "Have Kits",
-                    get_button_dict(ButtonStyles.LADDER_TOP, (172, 36)),
-                    object_id="@buttonstyles_ladder_top",
+                    get_button_dict(ButtonStyles.LADDER_BOTTOM, (172, 36)),
+                    object_id="@buttonstyles_ladder_bottom",
                     tool_tip_text='You will be more likely to have kits the next moon.',
                     starting_height=2,
                     manager=MANAGER)
@@ -3255,8 +3265,8 @@ class ProfileScreen(Screens):
                 self.have_kits_button = UISurfaceImageButton(
                     ui_scale(pygame.Rect((402, 586), (172, 36))),
                     "Have Kits",
-                    get_button_dict(ButtonStyles.LADDER_TOP, (172, 36)),
-                    object_id="@buttonstyles_ladder_top",
+                    get_button_dict(ButtonStyles.LADDER_BOTTOM, (172, 36)),
+                    object_id="@buttonstyles_ladder_bottom",
                     starting_height=2,
                     manager=MANAGER)
                 self.have_kits_button.disable()
@@ -3309,17 +3319,17 @@ class ProfileScreen(Screens):
             if self.the_cat.status not in ["newborn", "kitten"] and not self.the_cat.dead and not self.the_cat.outside:
                 self.your_faith_button = UISurfaceImageButton(
                     ui_scale(pygame.Rect((402, 478), (172, 36))), 
-                    "Your Faith",
-                    get_button_dict(ButtonStyles.LADDER_BOTTOM, (172, 36)),
-                    object_id="@buttonstyles_ladder_bottom",
+                    "Faith",
+                    get_button_dict(ButtonStyles.LADDER_TOP, (172, 36)),
+                    object_id="@buttonstyles_ladder_top",
                     starting_height=2,
                     manager=MANAGER)
             else:
                 self.your_faith_button = UISurfaceImageButton(
                     ui_scale(pygame.Rect((402, 478), (172, 36))), 
-                    "Your Faith",
-                    get_button_dict(ButtonStyles.LADDER_BOTTOM, (172, 36)),
-                    object_id="@buttonstyles_ladder_bottom",
+                    "Faith",
+                    get_button_dict(ButtonStyles.LADDER_TOP, (172, 36)),
+                    object_id="@buttonstyles_ladder_top",
                     starting_height=2,
                     manager=MANAGER)
                 self.your_faith_button.disable()
