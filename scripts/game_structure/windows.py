@@ -2668,6 +2668,9 @@ class ChangeCatToggles(UIWindow):
             elif event.ui_element == self.checkboxes["prevent_mates"]:
                 self.the_cat.no_mates = not self.the_cat.no_mates
                 self.refresh_checkboxes()
+            elif event.ui_element == self.checkboxes["no_faith"]:
+                self.the_cat.no_mates = not self.the_cat.no_faith
+                self.refresh_checkboxes()
 
         return super().process_event(event)
 
