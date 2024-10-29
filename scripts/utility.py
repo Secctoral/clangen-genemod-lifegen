@@ -505,6 +505,8 @@ def create_new_cat_block(
         if match.group(1) in [
             "newborn",
             "kitten",
+            "queen's apprentice",
+            "queen",
             "elder",
             "apprentice",
             "warrior",
