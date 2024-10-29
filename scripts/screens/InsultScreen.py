@@ -11,7 +11,7 @@ from scripts.utility import generate_sprite, get_cluster, get_alive_cats, get_al
 from scripts.cat.cats import Cat
 from scripts.game_structure import image_cache
 import pygame_gui
-from scripts.game_structure.game_essentials import game, screen
+from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import IDImageButton, UIImageButton, UISpriteButton
 from enum import Enum  # pylint: disable=no-name-in-module
 from scripts.housekeeping.version import VERSION_NAME
