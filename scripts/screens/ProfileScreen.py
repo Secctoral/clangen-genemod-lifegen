@@ -33,7 +33,10 @@ from scripts.utility import (
     shorten_text_to_fit,
     ui_scale_offset,
     adjust_list_text,
+    get_cluster
 )
+
+import math
 from .Screens import Screens
 from ..cat.history import History
 from ..game_structure.screen_settings import MANAGER
@@ -282,12 +285,42 @@ class ProfileScreen(Screens):
                         self.update_disabled_buttons_and_text()
                 else:
                     print("invalid next cat", self.previous_cat)
+            elif event.ui_element == self.inspect_button:
+                self.close_current_tab()
+                self.change_screen("sprite inspect screen")
+            elif event.ui_element == self.relations_tab_button:
+                self.toggle_relations_tab()
+            elif self.the_cat.ID == game.clan.your_cat.ID and event.ui_element == self.profile_elements["change_cat"]:
+                self.close_current_tab()
+                self.change_screen("choose reborn screen")
+            elif event.ui_element == self.roles_tab_button:
+                self.toggle_roles_tab()
+            elif event.ui_element == self.personal_tab_button:
+                self.toggle_personal_tab()
+            elif event.ui_element == self.your_tab:
+                self.toggle_your_tab()
+            elif event.ui_element == self.dangerous_tab_button:
+                self.toggle_dangerous_tab()
+            elif event.ui_element == self.backstory_tab_button:
+                if self.open_sub_tab is None:
+                    if game.switches["favorite_sub_tab"] is None:
+                        self.open_sub_tab = "life events"
+                    else:
+                        self.open_sub_tab = game.switches["favorite_sub_tab"]
+
+                self.toggle_history_tab()
+            elif event.ui_element == self.conditions_tab_button:
+                self.toggle_conditions_tab()
+            elif event.ui_element == self.accessories_tab_button:
+                self.toggle_accessories_tab()
+            elif event.ui_element == self.placeholder_tab_3:
+                self.toggle_faith_tab()  
             elif event.ui_element == self.clear_accessories:
                 self.the_cat.pelt.accessories.clear()
                 b_data = event.ui_element.blit_data[1]
                 b_2data = []
-                pos_x = 20
-                pos_y = 250
+                pos_x = 10
+                pos_y = 125
                 i = 0
                 cat = self.the_cat
                 age = cat.age
@@ -400,36 +433,7 @@ class ProfileScreen(Screens):
                                                                     line_spacing=0.95, manager=MANAGER)
                 self.update_disabled_buttons_and_text()
                 
-            elif event.ui_element == self.inspect_button:
-                self.close_current_tab()
-                self.change_screen("sprite inspect screen")
-            elif event.ui_element == self.relations_tab_button:
-                self.toggle_relations_tab()
-            elif self.the_cat.ID == game.clan.your_cat.ID and event.ui_element == self.profile_elements["change_cat"]:
-                self.close_current_tab()
-                self.change_screen("choose reborn screen")
-            elif event.ui_element == self.roles_tab_button:
-                self.toggle_roles_tab()
-            elif event.ui_element == self.personal_tab_button:
-                self.toggle_personal_tab()
-            elif event.ui_element == self.your_tab:
-                self.toggle_your_tab()
-            elif event.ui_element == self.dangerous_tab_button:
-                self.toggle_dangerous_tab()
-            elif event.ui_element == self.backstory_tab_button:
-                if self.open_sub_tab is None:
-                    if game.switches["favorite_sub_tab"] is None:
-                        self.open_sub_tab = "life events"
-                    else:
-                        self.open_sub_tab = game.switches["favorite_sub_tab"]
-
-                self.toggle_history_tab()
-            elif event.ui_element == self.conditions_tab_button:
-                self.toggle_conditions_tab()
-            elif event.ui_element == self.accessories_tab_button:
-                self.toggle_accessories_tab()
-            elif event.ui_element == self.placeholder_tab_3:
-                self.toggle_faith_tab()
+                
             elif (
                 "leader_ceremony" in self.profile_elements
                 and event.ui_element == self.profile_elements["leader_ceremony"]
@@ -498,6 +502,9 @@ class ProfileScreen(Screens):
                 self.profile_elements["not_favourite_button"].hide()
             else:
                 self.handle_tab_events(event)
+                
+            if game.switches["window_open"]:
+                pass
 
         elif event.type == pygame.KEYDOWN and game.settings["keybinds"]:
             if event.key == pygame.K_LEFT:
@@ -855,10 +862,10 @@ class ProfileScreen(Screens):
                                     self.cat_list_buttons["cat" + str(i)] = pygame_gui.elements.UIImage(ui_scale(pygame.Rect((100 + pos_x, 365 + pos_y), (50, 50))), sprites.sprites['acc_crafted' + accessory + cat_sprite], manager=MANAGER)
                                 elif accessory in cat.pelt.tail2_accessories:
                                     self.cat_list_buttons["cat" + str(i)] = pygame_gui.elements.UIImage(ui_scale(pygame.Rect((100 + pos_x, 365 + pos_y), (50, 50))), sprites.sprites['acc_tail2' + accessory + cat_sprite], manager=MANAGER)
-                                pos_x += 120
-                                if pos_x >= 1100:
+                                pos_x += 60
+                                if pos_x >= 550:
                                     pos_x = 0
-                                    pos_y += 120
+                                    pos_y += 60
                                 i += 1
                         except:
                             continue
@@ -972,14 +979,14 @@ class ProfileScreen(Screens):
         )
         # self.placeholder_tab_3.disable()
 
-        self.placeholder_tab_4 = UISurfaceImageButton(
-            ui_scale(pygame.Rect((576, 622), (176, 30))),
-            "Accessories",
-            get_button_dict(ButtonStyles.PROFILE_RIGHT, (176, 30)),
-            object_id="@buttonstyles_profile_right",
-            manager=MANAGER,
-        )
-        self.placeholder_tab_4.disable()
+        #self.placeholder_tab_4 = UISurfaceImageButton(
+            #ui_scale(pygame.Rect((576, 622), (176, 30))),
+            #"Accessories",
+            #get_button_dict(ButtonStyles.PROFILE_RIGHT, (176, 30)),
+            #object_id="@buttonstyles_profile_right",
+            #manager=MANAGER,
+        #)
+        #self.placeholder_tab_4.disable()
         
         self.accessories_tab_button = UISurfaceImageButton(
             ui_scale(pygame.Rect((576, 622), (176, 30))),
@@ -1031,7 +1038,6 @@ class ProfileScreen(Screens):
         self.conditions_tab_button.kill()
         self.placeholder_tab_3.kill()
         self.accessories_tab_button.kill()
-        self.placeholder_tab_4.kill()
         self.inspect_button.kill()
         self.close_current_tab()
 
@@ -1151,6 +1157,7 @@ class ProfileScreen(Screens):
 
         favorite_button_rect = ui_scale(pygame.Rect((0, 0), (28, 28)))
         favorite_button_rect.topright = ui_scale_offset((-5, 146))
+
         
         self.profile_elements["favourite_button"] = UIImageButton(
             favorite_button_rect,
@@ -1195,6 +1202,10 @@ class ProfileScreen(Screens):
             manager=MANAGER,
             tool_tip_text="Mark as favorite",
             starting_height=2,
+            anchors={
+                "right": "right",
+                "right_target": self.profile_elements["cat_name"],
+            },
         )
 
         if self.the_cat.favourite != 0:
@@ -1224,7 +1235,6 @@ class ProfileScreen(Screens):
                 self.accessory_tab_button.disable()
             else:
                 self.accessory_tab_button.enable()
-        del favorite_button_rect
 
 
          # Determine where the next and previous cat buttons lead
@@ -2776,8 +2786,18 @@ class ProfileScreen(Screens):
             pass
         else:
             self.open_tab = "faith"
-            self.backstory_background = pygame_gui.elements.UIImage(ui_scale(pygame.Rect((178, 930), (1240, 314))),
-                                                                    self.backstory_tab)
+            rect = ui_scale(pygame.Rect((0, 0), (620, 157)))
+            rect.bottomleft = ui_scale_offset((89, 0))
+            self.backstory_background = pygame_gui.elements.UIImage(
+                rect,
+                get_box(
+                    BoxStyles.ROUNDED_BOX, (620, 157), sides=(True, True, False, True)
+                ),
+                anchors={
+                    "bottom": "bottom",
+                    "bottom_target": self.conditions_tab_button,
+                },
+            )
             self.backstory_background.disable()
             self.open_faith_tab()
             self.update_disabled_buttons_and_text()
@@ -2823,22 +2843,32 @@ class ProfileScreen(Screens):
             pass
         else:
             self.open_tab = "accessories"
-            self.backstory_background = pygame_gui.elements.UIImage(ui_scale(pygame.Rect((178, 930), (1240, 314))),
-                                                                    self.backstory_tab)
+            rect = ui_scale(pygame.Rect((0, 0), (620, 157)))
+            rect.bottomleft = ui_scale_offset((89, 0))
+            self.backstory_background = pygame_gui.elements.UIImage(
+                rect,
+                get_box(
+                    BoxStyles.ROUNDED_BOX, (620, 157), sides=(True, True, False, True)
+                ),
+                anchors={
+                    "bottom": "bottom",
+                    "bottom_target": self.conditions_tab_button,
+                },
+            )
             self.backstory_background.disable()
 
             self.previous_page_button = UISurfaceImageButton(
-                ui_scale(pygame.Rect((55, 500), (34, 34))), "",
+                ui_scale(pygame.Rect((55, 500), (34, 34))),
                 Icon.ARROW_LEFT,
                 get_button_dict(ButtonStyles.ICON, (34, 34)),
                 object_id="@buttonstyles_icon",
-                manager=MANAGER,)
+                manager=MANAGER)
             self.next_page_button =  UISurfaceImageButton(
-                ui_scale(pygame.Rect((709, 500), (34, 34))), "",
+                ui_scale(pygame.Rect((709, 500), (34, 34))),
                 Icon.ARROW_RIGHT,
                 get_button_dict(ButtonStyles.ICON, (34, 34)),
                 object_id="@buttonstyles_icon",
-                manager=MANAGER,)
+                manager=MANAGER)
             self.clear_accessories = UIImageButton(ui_scale(pygame.Rect((709, 580), (34, 34))), "",
                                                   object_id="#exit_window_button", tool_tip_text="Remove all worn accessories", manager=MANAGER)
 
@@ -3637,6 +3667,9 @@ class ProfileScreen(Screens):
                     self.history_text_box.kill()
                 self.show_moons.kill()
                 self.no_moons.kill()
+            elif self.open_sub_tab == 'genetics':
+                if self.genetic_text_box:
+                    self.genetic_text_box.kill()
         elif self.open_tab == "accessories":
             self.backstory_background.kill()
             for i in self.cat_list_buttons:
@@ -3661,9 +3694,6 @@ class ProfileScreen(Screens):
                 self.gift_accessory_button.kill()
             if self.your_faith_button:
                 self.your_faith_button.kill()
-            elif self.open_sub_tab == 'genetics':
-                if self.genetic_text_box:
-                    self.genetic_text_box.kill()
 
         elif self.open_tab == "conditions":
             self.left_conditions_arrow.kill()
