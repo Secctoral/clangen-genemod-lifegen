@@ -158,16 +158,19 @@ class AllegiancesScreen(Screens):
         living_mediators = []
         living_warriors = []
         living_apprentices = []
+        living_queens = []
         living_kits = []
         living_elders = []
         for cat in living_cats:
-            if cat.status == "healer":
+            if cat.status == "medicine cat":
                 living_meds.append(cat)
             elif cat.status == "warrior":
                 living_warriors.append(cat)
             elif cat.status == "mediator":
                 living_mediators.append(cat)
-            elif cat.status in ["apprentice", "healer apprentice", "mediator apprentice"]:
+            elif cat.status == 'queen':
+                living_queens.append(cat)
+            elif cat.status in ["apprentice", "medicine cat apprentice", "mediator apprentice", "queen's apprentice"]:
                 living_apprentices.append(cat)
             elif cat.status in ["kitten", "newborn"]:
                 living_kits.append(cat)
@@ -175,7 +178,7 @@ class AllegiancesScreen(Screens):
                 living_elders.append(cat)
         if not len(living_meds):
             for cat in living_apprentices:
-                if cat.status == "healer apprentice":
+                if cat.status == "medicine cat apprentice":
                     living_meds.append(cat)
                     living_apprentices.remove(cat)
         if not len(living_mediators):
@@ -187,6 +190,7 @@ class AllegiancesScreen(Screens):
 
         living_meds = sorted(living_meds, key=lambda x: x.moons, reverse=True)
         living_mediators = sorted(living_mediators, key=lambda x: x.moons, reverse=True)
+        living_queens = sorted(living_queens, key=lambda x: x.moons, reverse=True)
         living_warriors = sorted(living_warriors, key=lambda x: x.moons, reverse=True)
         living_apprentices = sorted(living_apprentices, key=lambda x: x.moons, reverse=True)
         living_kits = sorted(living_kits, key=lambda x: x.moons, reverse=True)
@@ -231,7 +235,7 @@ class AllegiancesScreen(Screens):
         if living_meds:
             if len(living_meds) == 1:
                 _box = ["", "", "", ""]
-                _box[0] = '<b><u>HEALER</u></b>'
+                _box[0] = '<b><u>MEDICINE CAT</u></b>'
                 x = self.generate_one_entry(living_meds[0])
                 _box[1] = x[0]
                 _box[2] = x[1]
@@ -241,7 +245,7 @@ class AllegiancesScreen(Screens):
                 for i in range(len(living_meds)):    
                     _box = ["", "", "", ""]
                     if i == 0:    
-                        _box[0] = '<b><u>HEALERS</u></b>'
+                        _box[0] = '<b><u>MEDICINE CATS</u></b>'
                     else:
                         _box[0] = ""
                     x = self.generate_one_entry(living_meds[i])
@@ -341,6 +345,9 @@ class AllegiancesScreen(Screens):
 
                 all_entries.append(self.generate_one_entry(queen, kittens))
 
+            for k in living_queens:
+                if k.ID not in queen_dict.keys():
+                    all_entries.append(self.generate_one_entry(k))
             # Now kittens without carers
             for k in living_kits:
                 all_entries.append([str(k.name).upper(), k.ID, f"{str(k.name).upper()} - {k.describe_cat(short=True)}"])
