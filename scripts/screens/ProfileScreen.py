@@ -1441,7 +1441,7 @@ class ProfileScreen(Screens):
                 self.close_current_tab()
             self.placeholder_tab_3.kill()
             self.placeholder_tab_3 = None
-            self.placeholder_tab_3 = UIImageButton(
+            self.placeholder_tab_3 = UISurfaceImageButton(
                 ui_scale(pygame.Rect((400, 622), (176, 30))),
                 "Faith",
                 get_button_dict(ButtonStyles.PROFILE_MIDDLE, (176, 30)),
