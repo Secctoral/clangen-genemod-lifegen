@@ -114,7 +114,7 @@ class InsultScreen(Screens):
             )
         # self.textbox_graphic.hide()
 
-        self.profile_elements["cat_image"] = pygame_gui.elements.UIImageui_((35, 450), (200, 200))),
+        self.profile_elements["cat_image"] = pygame_gui.elements.UIImageui_(((35, 450), (200, 200)),
                                                                         pygame.transform.scale(
                                                                             generate_sprite(self.the_cat),
                                                                             (200, 200)), manager=MANAGER)
@@ -317,7 +317,7 @@ class InsultScreen(Screens):
             text = text[0]
 
             #the background image for the text
-            option_bg = pygame_gui.elements.UIImageui_((430, 428 + y_pos), (270, 35))),
+            option_bg = pygame_gui.elements.UIImageui_(((430, 428 + y_pos), (270, 35)),
                                                             pygame.transform.scale(
                                                                 image_cache.load_image(
                                                                     "resources/images/option_bg.png").convert_alpha(),
@@ -325,7 +325,7 @@ class InsultScreen(Screens):
             self.option_bgs[c] = option_bg
 
             #the button for dialogue choices
-            button = UIImageButtonui_((390, 428 + y_pos), (34, 34))),
+            button = UIImageButtonui_(((390, 428 + y_pos), (34, 34)),
                                         text = "",
                                         object_id="#dialogue_choice_button", manager=MANAGER)
             self.choice_buttons[c] = button
