@@ -105,6 +105,14 @@ def get_alive_status_cats(
 
     return alive_cats
 
+def get_alive_cats(Cat):
+    """
+    returns a list of IDs for all living apps in the clan
+    """
+    alive_apps = [i for i in Cat.all_cats.values() if
+                  not i.dead and not i.outside]
+    return alive_apps
+
 
 def get_living_cat_count(Cat):
     """
