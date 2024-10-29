@@ -24,6 +24,9 @@ from .SpriteInspectScreen import SpriteInspectScreen
 from .StartScreen import StartScreen
 from .SwitchClanScreen import SwitchClanScreen
 from .WarriorDenScreen import WarriorDenScreen
+from .TalkScreen import TalkScreen
+from .InsultScreen import InsultScreen
+from .FlirtScreen import FlirtScreen
 
 # ---------------------------------------------------------------------------- #
 #                                  UI RULES                                    #
@@ -81,6 +84,12 @@ class AllScreens:
     family_tree_screen = FamilyTreeScreen("family tree screen")
     mediation_screen = MediationScreen("mediation screen")
     change_gender_screen = ChangeGenderScreen("change gender screen")
+
+    # LifeGen screens
+
+    talk_screen = TalkScreen('talk screen')
+    insult_screen = InsultScreen('insult screen')
+    flirt_screen = FlirtScreen('flirt screen')
 
     @classmethod
     def rebuild_all_screens(cls):
