@@ -3,7 +3,7 @@ import pygame
 import ujson
 import re
 
-from scripts.utility import ui_scale
+from scripts.utility import ui_scale, ui_scale_dimensions, get_current_season
 
 from .Screens import Screens
 
@@ -12,10 +12,12 @@ from scripts.cat.cats import Cat
 from scripts.game_structure import image_cache
 import pygame_gui
 from scripts.game_structure.game_essentials import game
-from scripts.game_structure.ui_elements import IDImageButton, UIImageButton, UISpriteButton
+from scripts.game_structure.ui_elements import IDImageButton, UIImageButton, UISpriteButton, UISurfaceImageButton
 from enum import Enum  # pylint: disable=no-name-in-module
 from scripts.housekeeping.version import VERSION_NAME
 from scripts.game_structure.screen_settings import MANAGER
+from ..ui.generate_button import ButtonStyles, get_button_dict
+from ..ui.get_arrow import get_arrow
 
 
 class RelationType(Enum):
@@ -95,7 +97,7 @@ class InsultScreen(Screens):
             )
 
 
-       self.back_button = UISurfaceImageButton(
+        self.back_button = UISurfaceImageButton(
             ui_scale(pygame.Rect((25, 25), (105, 30))),
             get_arrow(2) + " Back",
             get_button_dict(ButtonStyles.SQUOVAL, (105, 30)),
@@ -114,10 +116,11 @@ class InsultScreen(Screens):
             )
         # self.textbox_graphic.hide()
 
-        self.profile_elements["cat_image"] = pygame_gui.elements.UIImageui_(((35, 450), (200, 200)),
-                                                                        pygame.transform.scale(
-                                                                            generate_sprite(self.the_cat),
-                                                                            (200, 200)), manager=MANAGER)
+        self.profile_elements["cat_image"] = pygame_gui.elements.UIImage(
+            ui_scale(pygame.Rect((35, 450), (200, 200))),
+            pygame.transform.scale(
+            generate_sprite(self.the_cat),
+            (200, 200)), manager=MANAGER)
         self.paw = pygame_gui.elements.UIImage(
                 ui_scale(pygame.Rect((685, 590), (15, 15))),
                 image_cache.load_image("resources/images/cursor.png").convert_alpha()
@@ -185,25 +188,39 @@ class InsultScreen(Screens):
                 platform_dir = f'{camp_bg_base_dir}/{biome}/{leaf}_{camp_nr}_{light_dark}.png'
             all_backgrounds.append(platform_dir)
 
-        self.newleaf_bg = pygame.transform.scale(
-            pygame.image.load(all_backgrounds[0]).convert(), (screen_x, screen_y))
-        self.greenleaf_bg = pygame.transform.scale(
-            pygame.image.load(all_backgrounds[1]).convert(), (screen_x, screen_y))
-        self.leafbare_bg = pygame.transform.scale(
-            pygame.image.load(all_backgrounds[2]).convert(), (screen_x, screen_y))
-        self.leaffall_bg = pygame.transform.scale(
-            pygame.image.load(all_backgrounds[3]).convert(), (screen_x, screen_y))
+        self.add_bgs(
+            {
+                "Newleaf": pygame.transform.scale(
+                    pygame.image.load(all_backgrounds[0]).convert(),
+                    ui_scale_dimensions((800, 700)),
+                ),
+                "Greenleaf": pygame.transform.scale(
+                    pygame.image.load(all_backgrounds[1]).convert(),
+                    ui_scale_dimensions((800, 700)),
+                ),
+                "Leaf-bare": pygame.transform.scale(
+                    pygame.image.load(all_backgrounds[2]).convert(),
+                    ui_scale_dimensions((800, 700)),
+                ),
+                "Leaf-fall": pygame.transform.scale(
+                    pygame.image.load(all_backgrounds[3]).convert(),
+                    ui_scale_dimensions((800, 700)),
+                ),
+            },
+            {
+                "Newleaf": None,
+                "Greenleaf": None,
+                "Leaf-bare": None,
+                "Leaf-fall": None,
+            },
+        )
+
+        self.set_bg(get_current_season())
 
     def on_use(self):
-        if game.clan.clan_settings['backgrounds']:
-            if game.clan.current_season == 'Newleaf':
-                screen.blit(self.newleaf_bg, (0, 0))
-            elif game.clan.current_season == 'Greenleaf':
-                screen.blit(self.greenleaf_bg, (0, 0))
-            elif game.clan.current_season == 'Leaf-bare':
-                screen.blit(self.leafbare_bg, (0, 0))
-            elif game.clan.current_season == 'Leaf-fall':
-                screen.blit(self.leaffall_bg, (0, 0))
+        if not game.clan.clan_settings["backgrounds"]:
+            self.set_bg(None)
+        super().on_use()
         now = pygame.time.get_ticks()
         if self.texts:
             if self.texts[self.text_index][0] == "[" and self.texts[self.text_index][-1] == "]":
