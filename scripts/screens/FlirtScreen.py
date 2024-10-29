@@ -11,7 +11,7 @@ from scripts.utility import generate_sprite, get_cluster, pronoun_repl, adjust_t
 from scripts.cat.cats import Cat
 from scripts.game_structure import image_cache
 import pygame_gui
-from scripts.game_structure.game_essentials import game, screen
+from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import UIImageButton
 from scripts.housekeeping.version import VERSION_NAME
 from scripts.game_structure.screen_settings import MANAGER
