@@ -17,7 +17,7 @@ from scripts.game_structure.ui_elements import (
     CatButton,
     UISpriteButton,
 )
-from scripts.game_structure.windows import GameOver
+from scripts.game_structure.windows import GameOver, DeathScreen, PickPath
 from scripts.screens.Screens import Screens
 from scripts.ui.generate_box import BoxStyles, get_box
 from scripts.ui.generate_button import get_button_dict, ButtonStyles
