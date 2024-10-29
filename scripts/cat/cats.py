@@ -4038,7 +4038,7 @@ class Cat:
 
     @staticmethod
     def rank_order(cat: Cat):
-        if cat.status in Cat.rank_sort_order:
+        if cat.status in Cat.rank_sort_order and cat.shunned == 0:
             return Cat.rank_sort_order.index(cat.status)
         else:
             return 0
