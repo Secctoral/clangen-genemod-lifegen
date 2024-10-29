@@ -194,7 +194,7 @@ class RoleScreen(Screens):
             "switch to queen",
             get_button_dict(ButtonStyles.LADDER_MIDDLE, (172, 36)),
             object_id="@buttonstyles_ladder_middle",
-            anchors={"top_target": self.bar},
+            anchors={"top_target": self.switch_mediator},
         )
 
         # In-TRAINING ROLES:
@@ -209,7 +209,7 @@ class RoleScreen(Screens):
         )
         self.switch_med_app = UISurfaceImageButton(
             ui_scale(pygame.Rect((579, 0), (172, 52))),
-            "switch to medicine cat\napprentice",
+            "switch to med. cat\napprentice",
             get_button_dict(ButtonStyles.LADDER_MIDDLE, (172, 52)),
             object_id="@buttonstyles_ladder_middle",
             anchors={"top_target": self.switch_warrior_app},
@@ -416,7 +416,7 @@ class RoleScreen(Screens):
             self.promote_deputy.disable()
 
             # ADULT CAT ROLES
-           self.switch_warrior.enable()
+            self.switch_warrior.enable()
             self.switch_med_cat.disable()
             self.switch_mediator.disable()
             self.switch_queen.disable()
