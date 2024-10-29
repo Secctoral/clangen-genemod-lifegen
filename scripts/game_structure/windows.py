@@ -40,6 +40,7 @@ from scripts.housekeeping.update import (
     UpdateChannel,
     get_latest_version_number,
 )
+from scripts.event_class import Single_Event
 from scripts.housekeeping.version import get_version_info
 from scripts.ui.generate_box import BoxStyles, get_box
 from scripts.ui.generate_button import ButtonStyles, get_button_dict
