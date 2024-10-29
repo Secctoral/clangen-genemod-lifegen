@@ -734,6 +734,23 @@
       }
     }
   },
+  "#dialogue_choice_button": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/dialogue_choice.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/dialogue_choice_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/dialogue_choice_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/dialogue_choice_unavailable.png"
+            }
+        }
+    },
   "#queen_activity_button": {
         "prototype": "#image_button",
         "images": {
