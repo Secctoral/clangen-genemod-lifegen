@@ -171,11 +171,6 @@ class Events:
             # get the moonskip freshkill
             self.get_moon_freshkill()
 
-        # Adding in any potential lead den events that have been saved
-        if "lead_den_interaction" in game.clan.clan_settings:
-            if game.clan.clan_settings["lead_den_interaction"]:
-                self.handle_lead_den_event()
-
         # checking if a lost cat returns on their own
         rejoin_upperbound = game.config["lost_cat"]["rejoin_chance"]
         if random.randint(1, rejoin_upperbound) == 1:
@@ -189,11 +184,43 @@ class Events:
             faded_kits = self.kit_deaths(Cat.all_cats_list)
 
         # Calling of "one_moon" functions.
+        resource_dir = "resources/dicts/events/disasters/"
+        disaster_text = {}
+        with open(f"{resource_dir}forest.json",
+                  encoding="ascii") as read_file:
+            disaster_text = ujson.loads(read_file.read())
+        if not game.clan.disaster and random.randint(1,50) == 1:
+            for clan_cat in game.clan.clan_cats:
+                clan_cat_cat = Cat.fetch_cat(clan_cat)
+                if clan_cat_cat:
+                    clan_cat_cat.faith -= round(random.uniform(-1,0), 2)
+            game.clan.disaster = random.choice(list(disaster_text.keys()))
+            if "next_possible_disaster" in game.switches and game.switches["next_possible_disaster"]:
+                current_disaster =  disaster_text.get(game.switches["next_possible_disaster"])
+            else:
+                current_disaster = disaster_text.get(game.clan.disaster)
+            while not current_disaster or not disaster_text[game.clan.disaster]["trigger_events"] or (get_current_season() not in current_disaster["season"]):
+                game.clan.disaster = random.choice(list(disaster_text.keys()))
+                current_disaster = disaster_text.get(game.clan.disaster)
+        if game.clan.disaster and game.clan.disaster != "":
+            if "next_possible_disaster" in game.switches and game.clan.disaster == game.switches["next_possible_disaster"]:
+                game.switches["next_possible_disaster"] = None
+            for clan_cat in game.clan.clan_cats:
+                clan_cat_cat = Cat.fetch_cat(clan_cat)
+                if clan_cat_cat:
+                    clan_cat_cat.faith -= round(random.uniform(-0.1,0), 2)
+            self.handle_disaster()
+        
         for cat in Cat.all_cats.copy().values():
             if not cat.outside or cat.dead:
                 self.one_moon_cat(cat)
             else:
                 self.one_moon_outside_cat(cat)
+
+        # Adding in any potential lead den events that have been saved
+        if "lead_den_interaction" in game.clan.clan_settings:
+            if game.clan.clan_settings["lead_den_interaction"]:
+                self.handle_lead_den_event()
 
         # keeping this commented out till disasters are more polished
         # self.disaster_events.handle_disasters()
@@ -322,29 +349,10 @@ class Events:
         self.herb_gather()
         self.handle_focus()
         game.switches['have kits'] = True
-
-        if game.clan.game_mode in ["expanded", "cruel season"]:
-            amount_per_med = get_amount_cat_for_one_medic(game.clan)
-            med_fullfilled = medical_cats_condition_fulfilled(
-                Cat.all_cats.values(), amount_per_med
-            )
-            if not med_fullfilled:
-                string = (
-                    f"{game.clan.name}Clan does not have enough healthy medicine cats! Cats will be sick/hurt "
-                    f"for longer and have a higher chance of dying. "
-                )
-                game.cur_events_list.insert(0, Single_Event(string, "health"))
-        else:
-            has_med = any(
-                str(cat.status) in {"medicine cat", "medicine cat apprentice"}
-                and not cat.dead
-                and not cat.outside
-                for cat in Cat.all_cats.values()
-            )
-            if not has_med:
-                string = f"{game.clan.name}Clan has no medicine cat!"
-                game.cur_events_list.insert(0, Single_Event(string, "health"))
-
+        
+        # Clear the list of cats that died this moon.
+        game.just_died.clear()
+        
         for cat in Cat.all_cats.copy().values():
             if cat.shunned == 2:
                 if cat.status == "leader":
@@ -376,13 +384,35 @@ class Events:
                     string = f"{cat.name} has been shunned from the Clan."
                     
                     game.cur_events_list.insert(0, Single_Event(string, "alert", cat.ID))
-
-        # Clear the list of cats that died this moon.
-        game.just_died.clear()
-
+                    
         # Promote leader and deputy, if needed.
         self.check_and_promote_leader()
         self.check_and_promote_deputy()
+
+        if game.clan.game_mode in ["expanded", "cruel season"]:
+            amount_per_med = get_amount_cat_for_one_medic(game.clan)
+            med_fullfilled = medical_cats_condition_fulfilled(
+                Cat.all_cats.values(), amount_per_med
+            )
+            if not med_fullfilled:
+                string = (
+                    f"{game.clan.name}Clan does not have enough healthy medicine cats! Cats will be sick/hurt "
+                    f"for longer and have a higher chance of dying. "
+                )
+                game.cur_events_list.insert(0, Single_Event(string, "health"))
+        else:
+            has_med = any(
+                str(cat.status) in {"medicine cat", "medicine cat apprentice"}
+                and not cat.dead
+                and not cat.outside
+                for cat in Cat.all_cats.values()
+            )
+            if not has_med:
+                string = f"{game.clan.name}Clan has no medicine cat!"
+                game.cur_events_list.insert(0, Single_Event(string, "health"))
+
+        # Clear the list of cats that died this moon.
+        game.just_died.clear()
 
         resource_dir = "resources/dicts/events/lifegen_events/"
         with open(f"{resource_dir}ceremonies.json",
@@ -1749,6 +1779,32 @@ class Events:
                     )
                 )
                 cat.status_change("mediator")
+        if game.clan.clan_settings['become_med']:
+            # Note: These chances are large since it triggers every moon.
+            # Checking every moon has the effect giving older cats more chances to become a mediator
+            _ = game.config["roles"]["become_med_chances"]
+            if cat.status in _ and \
+                    not int(random.random() * _[cat.status]):
+                game.cur_events_list.append(
+                    Single_Event(
+                        f"{cat.name} had chosen to use their skills and experience to heal "
+                        f"and commune with StarClan. A meeting is called, and they "
+                        f"become the Clan's newest medicine cat. ", "ceremony",
+                        cat.ID))
+                cat.status_change("medicine cat")
+        if game.clan.clan_settings['become_queen']:
+            # Note: These chances are large since it triggers every moon.
+            # Checking every moon has the effect giving older cats more chances to become a mediator
+            _ = game.config["roles"]["become_queen_chances"]
+            if cat.status in _ and \
+                    not int(random.random() * _[cat.status]):
+                game.cur_events_list.append(
+                    Single_Event(
+                        f"{cat.name} had chosen to use their skills and experience to help nuture the "
+                        f"Clan's young. A meeting is called, and they "
+                        f"become the Clan's newest queen. ", "ceremony",
+                        cat.ID))
+                cat.status_change("queen")
 
     def get_moon_freshkill(self):
         """Adding auto freshkill for the current moon."""
@@ -1781,64 +1837,52 @@ class Events:
         """
         TODO: DOCS
         """
-        if game.clan.game_mode == "classic":
-            # in classic, you have a random amount of herbs.
-            # the actual herb doesn't matter; it's just the count.
-            herb_owned = random.choice(HERBS)
-            # values that will change the text that is displayed to say how many herbs you have
-            required_herbs = get_living_clan_cat_count(Cat) * 4
-            adjustment_factor = random.choices([0.25, 0.5, 1, 2, 3], weights=[1, 2, 3, 2, 1], k=1)[0]
-            herb_amount = int(required_herbs * adjustment_factor)
-            game.clan.herbs = {
-                herb_owned: herb_amount
-            }
-        else:
-            event_list = []
-            meds_available = get_alive_status_cats(Cat, ["medicine cat", "medicine cat apprentice"], working=True,
-                                                   sort=True)
-            for med in meds_available:
-                if game.clan.current_season in ["Newleaf", "Greenleaf"]:
-                    amount = random.choices([1, 2, 3, 4], weights=[1, 2, 2, 2], k=1)
-                elif game.clan.current_season == "Leaf-fall":
-                    amount = random.choices([0, 1, 2], weights=[3, 2, 1], k=1)
-                else:
-                    amount = random.choices([0, 1], weights=[3, 1], k=1)
-                if amount[0] != 0:
-                    herbs_found = random.sample(HERBS, k=amount[0])
-                    herb_display = []
-                    for herb in herbs_found:
-                        if herb in ["blackberry"]:
-                            continue
-                        if game.clan.current_season in ["Newleaf", "Greenleaf"]:
-                            amount = random.choices([2, 5, 8], weights=[3, 3, 1], k=1)
-                        else:
-                            amount = random.choices([2, 4], weights=[4, 1], k=1)
-                        if herb in game.clan.herbs:
-                            game.clan.herbs[herb] += amount[0]
-                        else:
-                            game.clan.herbs.update({herb: amount[0]})
-                        herb_display.append(herb.replace("_", " "))
-                else:
-                    herbs_found = []
-                    herb_display = []
-                if not herbs_found:
-                    event_list.append(f"{med.name} could not find any herbs this moon.")
-                else:
-                    try:
-                        if len(herbs_found) == 1:
-                            insert = f"{herb_display[0]}"
-                        elif len(herbs_found) == 2:
-                            insert = f"{herb_display[0]} and {herb_display[1]}"
-                        else:
-                            insert = f"{', '.join(herb_display[:-1])}, and {herb_display[-1]}"
-                        event_list.append(f"{med.name} gathered {insert} this moon.")
-                    except IndexError:
-                        event_list.append(
-                            f"{med.name} could not find any herbs this moon."
-                        )
-                        return
-            game.herb_events_list.extend(event_list)
-
+        event_list = []
+        meds_available = get_alive_status_cats(Cat, ["medicine cat", "medicine cat apprentice"], working=True,
+                                                sort=True)
+        for med in meds_available:
+            if game.clan.current_season in ["Newleaf", "Greenleaf"]:
+                amount = random.choices([0, 1, 2, 3], [1, 2, 2, 2], k=1)
+            elif game.clan.current_season == "Leaf-fall":
+                amount = random.choices([0, 1, 2], [3, 2, 1], k=1)
+            else:
+                amount = random.choices([0, 1], [3, 1], k=1)
+            if amount[0] != 0:
+                herbs_found = random.sample(HERBS, k=amount[0])
+                herb_display = []
+                for herb in herbs_found:
+                    if herb in ["blackberry"]:
+                        continue
+                    if game.clan.current_season in ["Newleaf", "Greenleaf"]:
+                        amount = random.choices([1, 2, 3], [3, 3, 1], k=1)
+                    else:
+                        amount = random.choices([1, 2], [4, 1], k=1)
+                    if herb in game.clan.herbs:
+                        game.clan.herbs[herb] += amount[0]
+                    else:
+                        game.clan.herbs.update({herb: amount[0]})
+                    herb_display.append(herb.replace("_", " "))
+            else:
+                herbs_found = []
+                herb_display = []
+            if not herbs_found:
+                event_list.append(f"{med.name} could not find any herbs this moon.")
+            else:
+                try:
+                    if len(herbs_found) == 1:
+                        insert = f"{herb_display[0]}"
+                    elif len(herbs_found) == 2:
+                        insert = f"{herb_display[0]} and {herb_display[1]}"
+                    else:
+                        insert = f"{', '.join(herb_display[:-1])}, and {herb_display[-1]}"
+                    event_list.append(f"{med.name} gathered {insert} this moon.")
+                except IndexError:
+                    event_list.append(
+                        f"{med.name} could not find any herbs this moon."
+                    )
+                    return
+        game.herb_events_list.extend(event_list)
+        
     def handle_focus(self):
         """
         This function should be called late in the 'one_moon' function and handles all focuses which are possible to handle here:
@@ -2263,6 +2307,8 @@ class Events:
                         self.ceremony(x, "medicine cat")
                     elif x.status == "mediator apprentice":
                         self.ceremony(x, "mediator")
+                    elif x.status == "queen's apprentice":
+                        self.ceremony(x, "queen")
                     else:
                         self.ceremony(x, "warrior")
                 elif (
@@ -2271,6 +2317,7 @@ class Events:
                         "apprentice",
                         "medicine cat apprentice",
                         "mediator apprentice",
+                        "queen's apprentice"
                     ]
                     and x.moons >= 6
                 ):
@@ -2488,6 +2535,8 @@ class Events:
             if cat.dead:
                 return
             self.handle_outbreaks(cat)
+        elif cat.ID != game.clan.your_cat.ID and cat.status not in ['kitten', 'elder', 'newborn'] and not cat.outside and not cat.dead:
+            cat.experience += random.randint(0,5)
 
         # newborns don't do much
         if cat.status == "newborn":
@@ -2498,8 +2547,8 @@ class Events:
         if not cat.outside and not cat.exiled:
             if cat.shunned == 0:
                 self.handle_apprentice_EX(cat)  # This must be before perform_ceremonies!
-        # this HAS TO be before the cat.is_disabled() so that disabled kits can choose a med cat or mediator position
-        self.perform_ceremonies(cat)
+            # this HAS TO be before the cat.is_disabled() so that disabled kits can choose a med cat or mediator position
+            self.perform_ceremonies(cat)
         cat.skills.progress_skill(cat)  # This must be done after ceremonies.
 
         # check for death/reveal/risks/retire caused by permanent conditions
@@ -2525,10 +2574,13 @@ class Events:
         # now we make sure ill and injured cats don't get interactions they shouldn't
         if cat.is_ill() or cat.is_injured():
             return
+            
+        if cat.exiled:
+            Cat.handle_exile_returns(self)
 
         self.invite_new_cats(cat)
         self.other_interactions(cat)
-        self.gain_accessories(cat)
+        # self.gain_accessories(cat)
 
         # switches between the two death handles
         if random.getrandbits(1):
@@ -2879,8 +2931,10 @@ class Events:
                         chance = int(chance * 2.22)
 
                     if cat.personality.trait in [
+                        "altruistic",
                         "careful",
                         "compassionate",
+                        "empathetic",
                         "loving",
                         "wise",
                         "faithful",
@@ -3066,7 +3120,7 @@ class Events:
             possible_ceremonies.update(self.ceremony_id_by_tag[promoted_to])
 
             # Get ones for prepared status ----------------------------------------------
-            if promoted_to in ["warrior", "medicine cat", "mediator"]:
+            if promoted_to in ["warrior", "medicine cat", "mediator", "queen"]:
                 possible_ceremonies = possible_ceremonies.intersection(
                     self.ceremony_id_by_tag[preparedness]
                 )
@@ -3095,7 +3149,7 @@ class Events:
             # is being promoted too.
             valid_living_former_mentors = []
             for c in cat.former_mentor:
-                if not (Cat.fetch_cat(c).dead or Cat.fetch_cat(c).outside):
+                if not (Cat.fetch_cat(c).dead or Cat.fetch_cat(c).outside or Cat.fetch_cat(c).shunned > 0):
                     if promoted_to in mentor_type:
                         if Cat.fetch_cat(c).status in mentor_type[promoted_to]:
                             valid_living_former_mentors.append(c)
@@ -3235,39 +3289,7 @@ class Events:
             except KeyError:
                 random_honor = "hard work"
 
-            if cat.status in ["warrior", "medicine cat", "mediator", "queen"]:
-                History.add_app_ceremony(cat, random_honor)
-
-        # lifegen filtering for shunned/forgiven
-        # it's easier to do here lol
-        new_ceremonies = []
-        for ceremony in possible_ceremonies:
-            tags = self.CEREMONY_TXT[ceremony][0]
-            text = self.CEREMONY_TXT[ceremony][1]
-
-            if LG_TYPE == "shunned":
-                # a ceremony for a cat WHILE theyre shunned
-                if "shunned" not in tags:
-                    continue
-            
-            elif LG_TYPE == "forgiven":
-                # a ceremony for a cat returning to work after being forgiven
-                if "forgiven" not in tags:
-                    continue
-                if (cat.moons - cat.shunned) > 5:
-                    if "shunned_as_apprentice" not in tags:
-                        continue
-                else:
-                    if "shunned_as_kit" not in tags:
-                        continue
-            
-            else:
-                if "forgiven" in tags or "shunned" in tags:
-                    continue
-            
-            new_ceremonies.append(ceremony)
-
-            #if cat.name.suffix and game.clan.clan_settings['alt_suffixes']:
+        #if cat.name.suffix and game.clan.clan_settings['alt_suffixes']:
             if cat.name.suffix and False:
                 resource_dir = "resources/dicts/names/"
                 with open(
@@ -3326,12 +3348,60 @@ class Events:
                     except:
                         continue
 
-        if cat.status in ["warrior", "medicine cat", "mediator", "queen"]:
+        if cat.status in ["warrior", "healer", "mediator"]:
             History.add_app_ceremony(cat, random_honor)
 
-        ceremony_tags, ceremony_text = self.CEREMONY_TXT[
-            random.choice(list(possible_ceremonies))
-        ]
+        # lifegen filtering for shunned/forgiven
+        # it's easier to do here lol
+        new_ceremonies = []
+        for ceremony in possible_ceremonies:
+            tags = self.CEREMONY_TXT[ceremony][0]
+            text = self.CEREMONY_TXT[ceremony][1]
+
+            if LG_TYPE == "shunned":
+                # a ceremony for a cat WHILE theyre shunned
+                if "shunned" not in tags:
+                    continue
+            
+            elif LG_TYPE == "forgiven":
+                # a ceremony for a cat returning to work after being forgiven
+                if "forgiven" not in tags:
+                    continue
+                if (cat.moons - cat.shunned) > 5:
+                    if "shunned_as_apprentice" not in tags:
+                        continue
+                else:
+                    if "shunned_as_kit" not in tags:
+                        continue
+            
+            else:
+                if "forgiven" in tags or "shunned" in tags:
+                    continue
+            
+            new_ceremonies.append(ceremony)
+
+        if promoted_to in [
+            "apprentice",
+            "medicine cat apprentice",
+            "mediator apprentice",
+            "queen's apprentice"
+        ]:
+            try:
+                ceremony_tags, ceremony_text = self.CEREMONY_TXT[
+                    random.choice(list(new_ceremonies))
+                ]
+                # print("working ceremony for", cat.name, LG_TYPE)
+                # print(new_ceremonies)
+            except IndexError:
+                print("WARNING: A ceremony could not be chosen for", cat.name, LG_TYPE)
+                print(new_ceremonies)
+                print(cat.moons - cat.shunned)
+                return
+        else:
+        # -------------------
+            ceremony_tags, ceremony_text = self.CEREMONY_TXT[
+                random.choice(list(possible_ceremonies))
+            ]
 
         # This is a bit strange, but it works. If there is
         # only one parent involved, but more than one living
@@ -3382,11 +3452,7 @@ class Events:
             game.cur_events_list.append(
                 Single_Event(f'{ceremony_text}', "ceremony", involved_cats))
         cat.faith += round(random.uniform(0,2), 2)
-
-        game.cur_events_list.append(
-            Single_Event(f"{ceremony_text}", "ceremony", involved_cats)
-        )
-        # game.ceremony_events_list.append(f'{cat.name}{ceremony_text}')
+        game.ceremony_events_list.append(f'{cat.name}{ceremony_text}')
 
     def gain_accessories(self, cat):
         """
@@ -3505,8 +3571,8 @@ class Events:
         TODO: DOCS
         """
         if cat.status in [
-            "apprentice", "medicine cat apprentice", "mediator apprentice"
-        ]:
+            "apprentice", "medicine cat apprentice", "mediator apprentice", "queen's apprentice"
+        ] and cat.shunned == 0:
 
             if cat.not_working() and int(random.random() * 3):
                 return
@@ -3529,9 +3595,6 @@ class Events:
                 list(range(ran[0][0], ran[0][1] + 1))
                 + list(range(ran[1][0], ran[1][1] + 1))
             )
-
-            if game.clan.game_mode == "classic":
-                exp += random.randint(0, 3)
 
             cat.experience += max(exp * mentor_modifier, 1)
 
@@ -3559,6 +3622,7 @@ class Events:
             base_chance = 300
 
         reputation = game.clan.reputation
+        reputation = 80
         # hostile
         if 1 <= reputation <= 30:
             if clan_size < 10:
@@ -3802,10 +3866,10 @@ class Events:
             kill_chance = max(1, int(kill_chance))
 
             if not int(random.random() * kill_chance):
-                # print(
-                #     cat.name, "TARGET CHOSEN", Cat.fetch_cat(chosen_target.cat_to).name
-                # )
-                # print("KILL KILL KILL")
+                 print(
+                     cat.name, "TARGET CHOSEN", Cat.fetch_cat(chosen_target.cat_to).name
+                 )
+                 print("KILL KILL KILL")
 
                 handle_short_events.handle_event(event_type="birth_death",
                                                  main_cat=Cat.fetch_cat(chosen_target.cat_to),
@@ -3813,6 +3877,101 @@ class Events:
                                                  sub_type=["murder"],
                                                  freshkill_pile=game.clan.freshkill_pile)
 
+
+    def handle_disaster(self):
+        if not game.clan.disaster:
+            return
+
+        resource_dir = "resources/dicts/events/disasters/"
+        disaster_text = {}
+        with open(f"{resource_dir}forest.json",
+                  encoding="ascii") as read_file:
+            disaster_text = ujson.loads(read_file.read())
+        
+        current_disaster = disaster_text.get(game.clan.disaster)
+        current_moon = game.clan.disaster_moon
+        if current_moon == 0:
+            event_string = random.choice(current_disaster["trigger_events"])
+            game.clan.disaster_moon += 1
+        elif current_moon < current_disaster["duration"]:
+            event_string = random.choice(current_disaster["progress_events"]["moon" + str(current_moon)])
+            game.clan.disaster_moon += 1
+            self.handle_disaster_impacts(current_disaster)
+            if random.randint(1,30) == 1 and not game.clan.second_disaster and current_disaster["secondary_disasters"]:
+                game.clan.second_disaster = random.choice(list(current_disaster["secondary_disasters"].keys()))
+                secondary_event_string = random.choice(current_disaster["secondary_disasters"][game.clan.second_disaster]["trigger_events"])
+                secondary_event_string = ongoing_event_text_adjust(Cat, secondary_event_string)
+                game.cur_events_list.append(
+                        Single_Event(secondary_event_string, "alert"))
+        else:
+            event_string = random.choice(current_disaster["conclusion_events"])
+            game.clan.disaster_moon = 0
+            game.clan.disaster = ""
+        
+        event_string = ongoing_event_text_adjust(Cat, event_string)
+        game.cur_events_list.insert(0, 
+                        Single_Event(event_string, "alert"))
+        if game.clan.second_disaster:
+            self.handle_second_disaster()
+    
+    def handle_disaster_impacts(self, current_disaster):      
+        for i in range(random.randint(0,2)):
+            cat = Cat.all_cats.get(random.choice(game.clan.clan_cats))
+            for j in range(20):
+                if cat.outside or cat.dead or cat.moons < 6:
+                    cat = Cat.all_cats.get(random.choice(game.clan.clan_cats))
+                else:
+                    break
+            if cat.outside or cat.dead or cat.moons < 6:
+                return
+            if current_disaster["collateral_damage"]:
+                if random.randint(1,10) == 1:
+                    if random.randint(1,5) == 1:
+                        herbs = game.clan.herbs.copy()
+                        for herb in herbs:
+                            adjust_by = random.choices([-3, -2, -1], [1, 2, 3],
+                                                    k=1)
+                            game.clan.herbs[herb] += adjust_by[0]
+                            if game.clan.herbs[herb] <= 0:
+                                game.clan.herbs.pop(herb)
+                    if random.randint(1,5) == 1:
+                        game.clan.freshkill_pile.total_amount = game.clan.freshkill_pile.total_amount * 0.7
+                if random.randint(1,10) != 1:
+                    if "injuries" in current_disaster["collateral_damage"]:
+                        cat.get_injured(random.choice(current_disaster["collateral_damage"]["injuries"]))
+                else:
+                    if "deaths" in current_disaster["collateral_damage"]:
+                        if cat.status == "leader":
+                            History.add_death(cat, death_text=current_disaster["collateral_damage"]["deaths"]["history_text"]["reg_death"][4:])
+                        else:
+                            History.add_death(cat, death_text=current_disaster["collateral_damage"]["deaths"]["history_text"]["reg_death"])
+                        cat.die()
+                        death_text = random.choice(current_disaster["collateral_damage"]["deaths"]["death_text"]).replace("m_c", str(cat.name)).replace("c_n", str(game.clan.name) + "Clan")
+                        game.cur_events_list.insert(0,
+                            Single_Event(death_text, "birth_death", cat.ID))
+
+    def handle_second_disaster(self):
+        resource_dir = "resources/dicts/events/disasters/"
+        disaster_text = {}
+        with open(f"{resource_dir}forest.json",
+                encoding="ascii") as read_file:
+            disaster_text = ujson.loads(read_file.read())
+        current_disaster = disaster_text.get(game.clan.second_disaster)
+        current_moon = game.clan.second_disaster_moon
+        if current_moon > 0 and current_moon < current_disaster["duration"]:
+            event_string = random.choice(current_disaster["progress_events"]["moon" + str(current_moon)])
+            event_string = ongoing_event_text_adjust(Cat, event_string)
+            game.clan.second_disaster_moon += 1
+            game.cur_events_list.insert(0,
+                        Single_Event(event_string, "alert"))
+        elif current_moon == current_disaster["duration"]:
+            event_string = random.choice(current_disaster["conclusion_events"])
+            game.clan.second_disaster_moon = 0
+            game.clan.second_disaster = ""
+            event_string = ongoing_event_text_adjust(Cat, event_string)
+            game.cur_events_list.insert(0,
+                        Single_Event(event_string, "alert"))
+            
     def handle_illnesses_or_illness_deaths(self, cat):
         """
         This function will handle:
@@ -4167,6 +4326,7 @@ class Events:
             or game.clan.deputy.status == "elder"
         ):
             if game.clan.clan_settings.get("deputy"):
+                text = ""
 
                 # This determines all the cats who are eligible to be deputy.
                 possible_deputies = list(
