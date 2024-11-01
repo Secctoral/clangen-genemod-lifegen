@@ -9,7 +9,7 @@ class Personality:
     """Hold personality information for a cat, and functions to deal with it"""
 
     facet_types = ["lawfulness", "sociability", "aggression", "stability"]
-    facet_range = [0, 16]
+    facet_range = [0, 15]
 
     with open(
             "resources/dicts/traits/trait_ranges.json", "r", encoding="utf-8"
@@ -245,7 +245,15 @@ class Personality:
             possible_traits.append(trait)
 
         if possible_traits:
-            self.trait = choice(possible_traits)
+            # for i in range(5):
+            new_trait = choice(possible_traits)
+                # new_trait_cluster1, new_trait_cluster2 = get_cluster(new_trait)
+                # trait_cluster1, trait_cluster2 = get_cluster(self.trait)
+                # if any(cluster in [trait_cluster1, trait_cluster2] for cluster in [new_trait_cluster1, new_trait_cluster2]):
+                #     break
+                # else:
+                #     new_trait = choice(possible_traits)
+            self.trait = new_trait
         else:
             print("No possible traits! Using 'strange'")
             self.trait = "strange"
