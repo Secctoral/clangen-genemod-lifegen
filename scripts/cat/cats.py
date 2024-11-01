@@ -1607,13 +1607,12 @@ class Cat:
                 while max_influence > i:
                     i += 1
                     affect_personality = self.personality.mentor_influence(
-                        Cat.fetch_cat(mentor).personality
+                        Cat.fetch_cat(mentor)
                     )
                     affect_skills = self.skills.mentor_influence(Cat.fetch_cat(mentor))
                     if affect_personality:
                         History.add_facet_mentor_influence(
                             self,
-                            mentor.ID,
                             affect_personality[0],
                             affect_personality[1],
                             affect_personality[2],
