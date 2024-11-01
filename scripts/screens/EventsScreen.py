@@ -2,6 +2,7 @@ from typing import Dict
 
 import pygame
 import pygame_gui
+import random
 
 from scripts.cat.cats import Cat
 from scripts.event_class import Single_Event
@@ -18,6 +19,7 @@ from scripts.game_structure.ui_elements import (
     UISpriteButton,
 )
 from scripts.game_structure.windows import GameOver, DeathScreen, PickPath
+from scripts.clan_resources.freshkill import FreshkillPile, Nutrition
 from scripts.screens.Screens import Screens
 from scripts.ui.generate_box import BoxStyles, get_box
 from scripts.ui.generate_button import get_button_dict, ButtonStyles
@@ -867,6 +869,12 @@ class EventsScreen(Screens):
         Kills and recreates the event display, updates the clan info, sets the event display scroll position if it was
         previously saved
         """
+        if not game.clan.your_cat:
+            print(
+                "Are you playing a normal ClanGen save? Switch to a LifeGen save or create a new cat!")
+            print("Choosing random cat to play...")
+            game.clan.your_cat = Cat.all_cats[random.choice(game.clan.clan_cats)]
+            print("Chose " + str(game.clan.your_cat.name))
 
         # UPDATE CLAN INFO
          # self.clan_info["season"].set_text(f"Current season: {game.clan.current_season}")
