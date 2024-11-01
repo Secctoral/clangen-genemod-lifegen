@@ -3866,10 +3866,10 @@ class Events:
             kill_chance = max(1, int(kill_chance))
 
             if not int(random.random() * kill_chance):
-                 print(
+                print(
                      cat.name, "TARGET CHOSEN", Cat.fetch_cat(chosen_target.cat_to).name
                  )
-                 print("KILL KILL KILL")
+                print("KILL KILL KILL")
 
                 handle_short_events.handle_event(event_type="birth_death",
                                                  main_cat=Cat.fetch_cat(chosen_target.cat_to),
