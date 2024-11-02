@@ -962,6 +962,8 @@ class MakeClanScreen(Screens):
         self.tabs["tab2"].kill()
         self.tabs["tab3"].kill()
         self.tabs["tab4"].kill()
+        self.tabs["tab5"].kill()
+        self.tabs["tab6"].kill()
 
         if self.biome_selected == "Forest":
             self.tabs["tab1"] = UIImageButton(
@@ -986,6 +988,18 @@ class MakeClanScreen(Screens):
                 ui_scale(pygame.Rect((85, 285), (154, 30))),
                 "",
                 object_id="#lakeside_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab5"] = UIImageButton(
+                ui_scale(pygame.Rect((85, 320), (154, 30))),
+                "",
+                object_id="#pine_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab6"] = UIImageButton(
+                ui_scale(pygame.Rect((85, 355), (154, 30))),
+                "",
+                object_id="#birch_camp_tab",
                 manager=MANAGER,
             )
         elif self.biome_selected == "Mountainous":
@@ -1013,6 +1027,18 @@ class MakeClanScreen(Screens):
                 object_id="#ruins_tab",
                 manager=MANAGER,
             )
+            self.tabs["tab5"] = UIImageButton(
+                ui_scale(pygame.Rect((107, 320), (154, 30))),
+                "",
+                object_id="#quarry_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab6"] = UIImageButton(
+                ui_scale(pygame.Rect((42, 355), (154, 30))),
+                "",
+                object_id="#rocky_slope_tab",
+                manager=MANAGER,
+            )
         elif self.biome_selected == "Plains":
             self.tabs["tab1"] = UIImageButton(
                 ui_scale(pygame.Rect((64, 180), (154, 30))),
@@ -1030,6 +1056,24 @@ class MakeClanScreen(Screens):
                 ui_scale(pygame.Rect((64, 250), (154, 30))),
                 "",
                 object_id="#wasteland_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab4"] = UIImageButton(
+                ui_scale(pygame.Rect((64, 285), (154, 30))),
+                "",
+                object_id="#taiga_camp_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab5"] = UIImageButton(
+                ui_scale(pygame.Rect((59, 320), (154, 30))),
+                "",
+                object_id="#desert_tab",
+                manager=MANAGER,
+            )
+            self.tabs["tab6"] = UIImageButton(
+                ui_scale(pygame.Rect((59, 355), (154, 30))),
+                "",
+                object_id="#city_tab",
                 manager=MANAGER,
             )
         elif self.biome_selected == "Beach":
@@ -1051,6 +1095,12 @@ class MakeClanScreen(Screens):
                 object_id="#shipwreck_tab",
                 manager=MANAGER,
             )
+            self.tabs["tab4"] = UIImageButton(
+                ui_scale(pygame.Rect((70, 285), (154, 30))),
+                "",
+                object_id="#shipwreck_tab",
+                manager=MANAGER,
+            )
 
         self.tabs["tab1"].disable() if self.selected_camp_tab == 1 else self.tabs[
             "tab1"
@@ -1063,6 +1113,12 @@ class MakeClanScreen(Screens):
         ].enable()
         self.tabs["tab4"].disable() if self.selected_camp_tab == 4 else self.tabs[
             "tab4"
+        ].enable()
+        self.tabs["tab5"].disable() if self.selected_camp_tab == 5 else self.tabs[
+            "tab5"
+        ].enable()
+        self.tabs["tab6"].disable() if self.selected_camp_tab == 6 else self.tabs[
+            "tab6"
         ].enable()
 
         # I have to do this for proper layering.
