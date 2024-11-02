@@ -751,7 +751,7 @@ class Events:
         def create_siblings(parent1, parent2, adoptive_parents):
             '''Creates siblings for your cat'''
             num_siblings = random.randint(1,5)
-            kits = Pregnancy_Events.get_kits(kits_amount=num_siblings, cat=parent1, other_cat=parent2, adoptive_parents=adoptive_parents, clan=game.clan)
+            kits = Pregnancy_Events.get_kitsLG(kits_amount=num_siblings, cat=parent1, other_cat=parent2, adoptive_parents=adoptive_parents, clan=game.clan)
             return kits
 
         def pick_valid_parent(other_parent=None):
