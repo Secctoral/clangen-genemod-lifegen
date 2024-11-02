@@ -1,6 +1,7 @@
 import random
 from operator import xor
 from random import choice, randint
+from copy import deepcopy
 
 import ujson
 
@@ -1296,9 +1297,11 @@ class Pregnancy_Events:
         # First, gather all the mates of the provided bio parents to be added
         # as adoptive parents.
         all_adoptive_parents = []
-        
-        birth_parents = [i.ID for i in (cat, other_cat) if i]
-        for _par in (cat, other_cat):
+        all_pars = [cat]
+        if other_cat:
+            all_pars += other_cat
+        birth_parents = [i.ID for i in all_pars if i]
+        for _par in all_pars:
             if not _par:
                 continue
             for _m in _par.mate:
@@ -1361,8 +1364,10 @@ class Pregnancy_Events:
         #############################
 
         #### GENERATE THE KITS ######
-        for kit in range(kits_amount):
-            kit = None
+        identical = False
+        i = 0
+        while i < kits_amount:
+            i += 1
             if not cat:
                 # No parents provided, give a blood parent - this is an adoption.
                 if not blood_parent:
@@ -1436,6 +1441,406 @@ class Pregnancy_Events:
                     kit.thought = f"Snuggles up to the belly of {cat.name}"
                 else:
                     kit.thought = f"Snuggles up to the belly of {second_blood.name}"
+                    
+            if identical:
+                identical = False
+                ref_cat = deepcopy(all_kitten[-1])
+                kit.genotype = ref_cat.genotype    
+
+                kit.phenotype = ref_cat.phenotype   
+                kit.genotype.tortiepattern = None
+                kit.genotype.chimerapattern = None
+                kit.genotype.merlepattern = None
+                kit.genotype.white_pattern = kit.GenerateWhite(kit.genotype.white, kit.genotype.pointgene, kit.genotype.whitegrade, kit.genotype.vitiligo, None, kit.genotype.pax3)
+                kit.phenotype.PhenotypeOutput(kit.genotype.sex)
+                kit.phenotype.SpriteInfo(kit.moons)
+                
+                if kit.genotype.chimera:
+                    kit.chimerapheno = ref_cat.chimerapheno   
+                    kit.genotype.chimerageno.tortiepattern = None
+                    kit.genotype.chimerageno.chimerapattern = None
+                    kit.genotype.chimerageno.merlepattern = None
+                    kit.genotype.chimerageno.white_pattern = kit.GenerateWhite(kit.genotype.chimerageno.white, kit.genotype.chimerageno.pointgene, kit.genotype.chimerageno.whitegrade, kit.genotype.chimerageno.vitiligo, None, kit.genotype.chimerageno.pax3)
+                    kit.chimerapheno.PhenotypeOutput(kit.genotype.chimerageno.sex)
+                    kit.chimerapheno.SpriteInfo(kit.moons)
+
+                kit.parent1 = ref_cat.parent1    
+                kit.parent2 = ref_cat.parent2   
+                kit.parent3 = ref_cat.parent3  
+                kit.genderalign = ref_cat.genderalign
+
+            else:
+                if kit.genotype.chimera:
+                    kits_amount -= 1
+                    if i > kits_amount:
+                        kit.genotype.chimera = False
+                        kit.genotype.chimerageno = None
+                
+                if randint(1, game.config["genetics_config"]["identical_twins"]) == 1:
+                    kits_amount += 1
+                    identical = True
+                
+            #kit.adoptive_parents = all_adoptive_parents  # Add the adoptive parents. 
+            # Prevent duplicate prefixes in Clan
+            tries = 0
+            extant = [kitty.name.prefix for kitty in all_kitten if kitty.ID != kit.ID]
+            while tries < 20 and kit.name.prefix in extant:
+                kit.name = Name("newborn")
+                tries += 1
+
+            all_kitten.append(kit)
+            # adoptive parents are set at the end, when everything else is decided
+
+            # remove scars
+            kit.pelt.scars.clear()
+
+            # try to give them a permanent condition. 1/90 chance
+            # don't delete the game.clan condition, this is needed for a test
+            if game.clan and not int(
+                random.random()
+                * game.config["cat_generation"]["base_permanent_condition"]
+            ):
+                kit.congenital_condition(kit)
+                for condition in kit.permanent_condition:
+                    if kit.permanent_condition[condition] == 'born without a leg':
+                        kit.pelt.scars.append('NOPAW')
+                    elif kit.permanent_condition[condition] == 'born without a tail' and kit.phenotype.bobtailnr != 1:
+                        kit.pelt.scars.append('NOTAIL')
+                Condition_Events.handle_already_disabled(kit)
+
+            # create and update relationships
+            for cat_id in clan.clan_cats:
+                if cat_id == kit.ID:
+                    continue
+                the_cat = Cat.all_cats.get(cat_id)
+                if not the_cat or the_cat.dead or the_cat.outside:
+                    continue
+                if the_cat.ID in kit.get_parents():
+                    parent_to_kit = game.config["new_cat"]["parent_buff"][
+                        "parent_to_kit"
+                    ]
+                    y = random.randrange(0, 15)
+                    start_relation = Relationship(the_cat, kit, False, True)
+                    start_relation.platonic_like += parent_to_kit["platonic"] + y
+                    start_relation.comfortable = parent_to_kit["comfortable"] + y
+                    start_relation.admiration = parent_to_kit["admiration"] + y
+                    start_relation.trust = parent_to_kit["trust"] + y
+                    the_cat.relationships[kit.ID] = start_relation
+
+                    kit_to_parent = game.config["new_cat"]["parent_buff"][
+                        "kit_to_parent"
+                    ]
+                    y = random.randrange(0, 15)
+                    start_relation = Relationship(kit, the_cat, False, True)
+                    start_relation.platonic_like += kit_to_parent["platonic"] + y
+                    start_relation.comfortable = kit_to_parent["comfortable"] + y
+                    start_relation.admiration = kit_to_parent["admiration"] + y
+                    start_relation.trust = kit_to_parent["trust"] + y
+                    kit.relationships[the_cat.ID] = start_relation
+
+            #### REMOVE ACCESSORY ######
+            kit.pelt.accessory = None
+            clan.add_cat(kit)
+
+            #### GIVE HISTORY ######
+            History.add_beginning(kit, clan_born=bool(cat))
+
+        # check other cats of Clan for siblings
+        for kitten in all_kitten:
+            # update/buff the relationship towards the siblings
+            for second_kitten in all_kitten:
+                y = random.randrange(0, 10)
+                if second_kitten.ID == kitten.ID:
+                    continue
+                try:
+                    kitten.relationships[second_kitten.ID].platonic_like += 20 + y
+                    kitten.relationships[second_kitten.ID].comfortable += 10 + y
+                    kitten.relationships[second_kitten.ID].trust += 10 + y
+                except:
+                    start_relation = Relationship(kitten, second_kitten, False, True)
+                    kitten.relationships[second_kitten.ID] = start_relation
+                    kitten.relationships[second_kitten.ID].platonic_like = 20 + y
+                    kitten.relationships[second_kitten.ID].comfortable = 10 + y
+                    kitten.relationships[second_kitten.ID].trust = 10 + y
+            
+            kitten.create_inheritance_new_cat() # Calculate inheritance. 
+
+        # check if the possible adoptive cat is not already in the family tree and
+        # add them as adoptive parents if not
+        final_adoptive_parents = []
+        for adoptive_p in all_adoptive_parents:
+            if adoptive_p not in all_kitten[0].inheritance.all_involved:
+                final_adoptive_parents.append(adoptive_p)
+        
+        # Add the adoptive parents.
+        for kit in all_kitten:
+            kit.adoptive_parents = final_adoptive_parents.copy()
+            if blood_parent2:
+                for birth_p in blood_parent2:
+                    if birth_p.ID not in [kit.parent3, kit.parent2, kit.parent1] and birth_p.ID not in kit.adoptive_parents:
+                        kit.adoptive_parents.append(birth_p.ID)
+            if other_cat:
+                for birth_p in other_cat:
+                    if birth_p.ID not in [kit.parent3, kit.parent2, kit.parent1] and birth_p.ID not in kit.adoptive_parents:
+                        kit.adoptive_parents.append(birth_p.ID)
+            kit.inheritance.update_inheritance()
+            kit.inheritance.update_all_related_inheritance()
+
+            # update relationship for adoptive parents
+            for parent_id in kit.adoptive_parents:
+                parent = Cat.fetch_cat(parent_id)
+                if parent:
+                    kit_to_parent = game.config["new_cat"]["parent_buff"][
+                        "kit_to_parent"
+                    ]
+                    parent_to_kit = game.config["new_cat"]["parent_buff"][
+                        "parent_to_kit"
+                    ]
+                    change_relationship_values(
+                        cats_from=[kit],
+                        cats_to=[parent],
+                        platonic_like=kit_to_parent["platonic"],
+                        dislike=kit_to_parent["dislike"],
+                        admiration=kit_to_parent["admiration"],
+                        comfortable=kit_to_parent["comfortable"],
+                        jealousy=kit_to_parent["jealousy"],
+                        trust=kit_to_parent["trust"],
+                    )
+                    change_relationship_values(
+                        cats_from=[parent],
+                        cats_to=[kit],
+                        platonic_like=parent_to_kit["platonic"],
+                        dislike=parent_to_kit["dislike"],
+                        admiration=parent_to_kit["admiration"],
+                        comfortable=parent_to_kit["comfortable"],
+                        jealousy=parent_to_kit["jealousy"],
+                        trust=parent_to_kit["trust"],
+                    )
+
+        if blood_parent:
+            blood_parent.outside = True
+            if blood_parent.dead:
+                clan.unknown_cats.append(blood_parent.ID)
+        if blood_parent2:
+            for x in blood_parent2:
+                x.outside = True
+                if x.dead:
+                    clan.unknown_cats.append(x.ID)
+
+        return all_kitten
+        
+    def get_kitsLG(kits_amount, cat=None, other_cat=None, clan=game.clan, adoptive_parents=None, backkit=None):
+        """Create some amount of kits
+        No parents are specified, it will create a blood parents for all the
+        kits to be related to. They may be dead or alive, but will always be outside
+        the clan."""
+        all_kitten = []
+        if not adoptive_parents:
+            adoptive_parents = []
+
+        # First, just a check: If we have no cat, but an other_cat was provided,
+        # swap other_cat to cat:
+        # This way, we can ensure that if only one parent is provided,
+        # it's cat, not other_cat.
+        # And if cat is None, we know that no parents were provided.
+        if other_cat and not cat:
+            cat = other_cat
+            other_cat = None
+
+        blood_parent = None
+        blood_parent2 = None
+         
+        par2geno = Genotype(game.config['genetics_config'], game.settings["ban problem genes"])
+        if cat and 'Y' in cat.genotype.sexgene:
+            par2geno.Generator('fem')
+        elif cat:
+            par2geno.Generator('masc')
+        ##### SELECT BACKSTORY #####
+        if backkit:
+            backstory = backkit
+            if 'halfclan' in backkit:
+                other_cat = None
+        elif cat and 'Y' not in cat.genotype.sexgene:
+            backstory = choice(['halfclan1', 'outsider_roots1'])
+        elif cat:
+            backstory = choice(["halfclan2", "outsider_roots2"])
+        else:  # cat is adopted
+            backstory = choice(["abandoned1", "abandoned2", "abandoned3", "abandoned4"])
+        ###########################
+
+        ##### ADOPTIVE PARENTS #####
+        # First, gather all the mates of the provided bio parents to be added
+        # as adoptive parents.
+        all_adoptive_parents = []
+        birth_parents = [i.ID for i in (cat, other_cat) if i]
+        for _par in (cat, other_cat):
+            if not _par:
+                continue
+            for _m in _par.mate:
+                if _m not in birth_parents and _m not in all_adoptive_parents:
+                    all_adoptive_parents.append(_m)
+
+        # Then, add any additional adoptive parents that were provided passed directly into the
+        # function.
+        for _m in adoptive_parents:
+            if _m not in all_adoptive_parents:
+                all_adoptive_parents.append(_m)
+        if not cat:
+            litter_age = choice([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5])
+            
+            initial_amount = kits_amount
+            kits_amount = 0
+            if initial_amount < 3:
+                stillborn_chance = game.config['pregnancy']['stillborn_chances']['small']
+            elif initial_amount == 3:
+                stillborn_chance = game.config['pregnancy']['stillborn_chances']['three']
+            elif initial_amount < 6:
+                stillborn_chance = game.config['pregnancy']['stillborn_chances']['mid']
+            elif initial_amount < 9:
+                stillborn_chance = game.config['pregnancy']['stillborn_chances']['big']
+            else:
+                stillborn_chance = game.config['pregnancy']['stillborn_chances']['large']
+
+            if not (clan.clan_settings['modded_kits']):
+                stillborn_chance = 0
+
+            death_chances = game.config['death_related']['kit_death_chances']
+            for i in range(initial_amount):
+                if random.random() < stillborn_chance:
+                   continue
+                elif litter_age == 0 or not (clan.clan_settings['modded_kits']):
+                    kits_amount += 1
+                elif random.random() < death_chances['0']:
+                    continue
+                elif litter_age == 1:
+                    kits_amount += 1
+                elif random.random() < death_chances['1']:
+                    continue
+                elif litter_age == 2:
+                    kits_amount += 1
+                elif random.random() < death_chances['2']:
+                    continue
+                elif litter_age == 3:
+                    kits_amount += 1
+                elif random.random() < death_chances['3']:
+                    continue
+                elif litter_age == 4:
+                    kits_amount += 1
+                elif random.random() < death_chances['4']:
+                    continue
+                else:
+                    kits_amount += 1
+            if kits_amount == 0:
+                kits_amount = 1
+                
+        #############################
+
+        #### GENERATE THE KITS ######
+        identical = False
+        i = 0
+        while i < kits_amount:
+            i += 1
+            if not cat:
+                # No parents provided, give a blood parent - this is an adoption.
+                if not blood_parent:
+                    # Generate a blood parent if we haven't already. 
+                    nr_of_parents = 1
+                    
+                    insert = "their kits are"
+                    if kits_amount == 1:
+                        insert = "their kit is"
+                    thought = f"Is glad that {insert} safe"
+                    parage = randint(15,120)
+                    cat_type = random.choice(["loner", "kittypet"])
+                    blood_parent = create_new_cat(Cat,
+                                                loner=cat_type in ["loner", "rogue"],
+                                                kittypet=cat_type == "kittypet",
+                                                other_clan=cat_type == 'former Clancat',
+                                                status=cat_type,
+                                                gender='fem',
+                                                alive=choice([True, False]),
+                                                thought=thought,
+                                                age=parage,
+                                                outside=True,
+                                                is_parent=True)[0]
+                    blood_parent2 = []
+                    
+                    for i in range(0, nr_of_parents):
+                        blood_par2 = None
+                        parage = parage + randint(0, 24) - 12
+                        while not blood_par2 or 'infertility' in blood_par2.permanent_condition:
+                            if blood_par2 and Cat.all_cats[blood_par2.ID]:
+                                del Cat.all_cats[blood_par2.ID]
+                            cat_type = random.choice(["loner", "kittypet"])
+                            blood_par2 = create_new_cat(Cat,
+                                                        loner=cat_type in ["loner", "rogue"],
+                                                        kittypet=cat_type == "kittypet",
+                                                        other_clan=cat_type == 'former Clancat',
+                                                        status=cat_type,
+                                                        gender='masc',
+                                                        alive=choice([True, False]),
+                                                        thought=thought,
+                                                        age=parage if parage > 14 else 15,
+                                                        outside=True,
+                                                        is_parent=True)[0]
+                        blood_par2.thought = thought
+
+                        blood_parent2.append(blood_par2)
+
+                    blood_parent.thought = thought
+                kit = Cat(parent1=blood_parent2.ID, parent2=blood_parent.ID,moons=0, backstory=backstory, status='newborn' if litter_age == 0 else 'kitten')
+            else:
+                # Two parents provided
+
+                if backkit:    
+                    kit = Cat(parent1=cat.ID, parent2=other_cat.ID if other_cat else None, moons=0, backstory=backstory, status='newborn', extrapar = par2geno)
+                else:
+                    kit = Cat(parent1=cat.ID, parent2=other_cat.ID, moons=0, status='newborn')
+
+                if 'Y' not in cat.genotype.sexgene or not other_cat or other_cat.outside:
+                    kit.thought = f"Snuggles up to the belly of {cat.name}"
+                elif 'Y' in cat.genotype.sexgene and 'Y' in cat.genotype.sexgene:
+                    kit.thought = f"Snuggles up to the belly of {cat.name}"
+                else:
+                    kit.thought = f"Snuggles up to the belly of {other_cat.name}"
+                    
+            if identical:
+                identical = False
+                ref_cat = deepcopy(all_kitten[-1])
+                kit.genotype = ref_cat.genotype    
+
+                kit.phenotype = ref_cat.phenotype   
+                kit.genotype.tortiepattern = None
+                kit.genotype.chimerapattern = None
+                kit.genotype.merlepattern = None
+                kit.genotype.white_pattern = kit.GenerateWhite(kit.genotype.white, kit.genotype.pointgene, kit.genotype.whitegrade, kit.genotype.vitiligo, None, kit.genotype.pax3)
+                kit.phenotype.PhenotypeOutput(kit.genotype.sex)
+                kit.phenotype.SpriteInfo(kit.moons)
+                
+                if kit.genotype.chimera:
+                    kit.chimerapheno = ref_cat.chimerapheno   
+                    kit.genotype.chimerageno.tortiepattern = None
+                    kit.genotype.chimerageno.chimerapattern = None
+                    kit.genotype.chimerageno.merlepattern = None
+                    kit.genotype.chimerageno.white_pattern = kit.GenerateWhite(kit.genotype.chimerageno.white, kit.genotype.chimerageno.pointgene, kit.genotype.chimerageno.whitegrade, kit.genotype.chimerageno.vitiligo, None, kit.genotype.chimerageno.pax3)
+                    kit.chimerapheno.PhenotypeOutput(kit.genotype.chimerageno.sex)
+                    kit.chimerapheno.SpriteInfo(kit.moons)
+
+                kit.parent1 = ref_cat.parent1    
+                kit.parent2 = ref_cat.parent2   
+                kit.parent3 = ref_cat.parent3  
+                kit.genderalign = ref_cat.genderalign
+
+            else:
+                if kit.genotype.chimera:
+                    kits_amount -= 1
+                    if i > kits_amount:
+                        kit.genotype.chimera = False
+                        kit.genotype.chimerageno = None
+                
+                if randint(1, game.config["genetics_config"]["identical_twins"]) == 1:
+                    kits_amount += 1
+                    identical = True
                 
             #kit.adoptive_parents = all_adoptive_parents  # Add the adoptive parents. 
             # Prevent duplicate prefixes in Clan
