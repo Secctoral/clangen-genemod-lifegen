@@ -1616,6 +1616,7 @@ class Cat:
                             mentor.ID,
                             affect_personality[0],
                             affect_personality[1],
+                            affect_personality[2],
                         )
                     if affect_skills:
                         History.add_skill_mentor_influence(
