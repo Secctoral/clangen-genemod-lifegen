@@ -3274,6 +3274,142 @@
       }
     }
   },
+  "#pine_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/pine_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/pine_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/pine_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/pine_camp_unavailable.png"
+            }
+        }
+    },
+    "#quarry_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/quarry_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/quarry_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/quarry_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/quarry_camp_unavailable.png"
+            }
+        }
+    },
+    "#rocky_slope_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/rocky_slope_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/rocky_slope_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/rocky_slope_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/rocky_slope_camp_unavailable.png"
+            }
+        }
+    },
+    "#taiga_camp_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/taiga_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/taiga_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/taiga_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/taiga_camp_unavailable.png"
+            }
+        }
+    },
+    "#desert_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/desert.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/desert_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/desert_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/desert_unavaliable.png"
+            }
+        }
+    },
+    "#city_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/city_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/city_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/city_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/city_camp_unavailable.png"
+            }
+        }
+    },
+    "#birch_camp_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/birch_camp.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/birch_camp_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/birch_camp_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/birch_camp_unavailable.png"
+            }
+        }
+    },
+    "#tropical_island_tab": {
+        "prototype": "#image_button",
+        "images": {
+            "normal_image": {
+                "path": "resources/images/buttons/tropical_island.png"
+            },
+            "hovered_image": {
+                "path": "resources/images/buttons/tropical_island_hover.png"
+            },
+            "selected_image": {
+                "path": "resources/images/buttons/tropical_island_hover.png"
+            },
+            "disabled_image": {
+                "path": "resources/images/buttons/tropical_island_unavailable.png"
+            }
+        }
+    },
   "#freshkill_pile_empty": {
     "images": {
       "normal_image": {
